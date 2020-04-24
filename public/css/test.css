@@ -1,0 +1,118 @@
+img{
+  max-width: auto;
+  max-height: auto;
+  height: auto;
+  vertical-align: bottom;
+}
+table{
+  border: 0px none;
+  padding: 0px;
+  margin: 0px;
+  }
+td{
+  padding: 0px;
+  margin: 0px;
+}
+.td1{
+  width: 31px;
+  height: 48px;
+}
+.td2{
+  padding: 0px;
+  margin: 0px;
+  width: 48px;
+}
+body{
+    margin: 0;
+  }
+  .header{
+    background: green;
+    height: 80px;
+    text-align: center;
+    color: #fff;
+    width: 980px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .main-wrap{
+    height: 500px;
+    text-align: center;
+    color: #fff;
+    width: 980px;
+    margin-left: auto;
+    margin-right: auto;
+    overflow: hidden;
+  }
+  .center{
+    background: yellow;
+    height: 500px;
+    text-align: center;
+    color: #fff;
+    width: 680px;
+    float: left;
+  }
+  .side{
+    background: green;
+    height: 100%;
+    text-align: center;
+    color: #fff;
+    width: 150px;
+    float: left;
+  }
+  .footer{
+    background: green;
+    height: 150px;
+    text-align: center;
+    color: #fff;
+    width: 980px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .rotate{
+    transform: rotate(90deg);
+  }
+  .rotate1{
+    transform: rotate(180deg);
+  }
+  .rotate2{
+    transform: rotate(270deg);
+  }
+  .c_center{
+    background: red;
+    height: 200px;
+    text-align: center;
+    color: #fff;
+    width: 180px;
+    float: left;
+  }
+  .c_head{
+    background: green;
+    height: 100px;
+    text-align: center;
+    color: #fff;
+    width: 680px;
+  }
+  .c_side{
+    background:green;
+    height: 300px;
+    text-align: center;
+    color: #fff;
+    width: 200px;
+    float: left;
+  }
+  .c_sicro1{
+    background:green;
+    height: 300px;
+    text-align: center;
+    color: #fff;
+    width: 280px;
+    float: left;
+  }
+  .c_footer{
+    background: green;
+    height: 100px;
+    text-align: center;
+    color: #fff;
+    width: 680px;
+    float: left;
+  }
