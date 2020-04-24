@@ -88,6 +88,7 @@ class TestController extends Controller
                 'nokori_hai'=>$nokori_data
             ]);
         }
+        
         if($request->session()->get('player_no') == "player3"){
             $p1_hai = $haipai->player1_hai;
             $result = DB::table('haipai')
