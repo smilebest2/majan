@@ -10,6 +10,21 @@
         <script src="{{asset('/js/jquery-3.5.0.min.js')}}"></script>
         <script>
         $(document).ready(function(){
+            var tehais = $('[id^=tehai_]').length;
+            for (var i = 0; i <= tehais; i++) {
+                var select = "#tehai_" + String(i);
+                //マウスを乗せたら発動
+                $(select).hover(function() {
+                    //マウスを乗せたら色が変わる
+                    $(this).css('background-color', 'blue');
+                    $(this).css('opacity', '0.6');
+                //ここにはマウスを離したときの動作を記述
+                }, function() {
+                    //色指定を空欄にすれば元の色に戻る
+                    $(this).css('opacity', '1');
+                
+                });
+            }
             $('#tumo').on('click', function() {
                 $.ajaxSetup({
                     headers: {
@@ -603,27 +618,51 @@
             </article>
         </article>
         <aside class="side">
-            @if(Session::get('player_no') =="player3")
-                {{$game_status->user3}}<br>
-                 持ち点 {{$game_status->player3_ten}}<br><br>                 
-                <?php
-                    //下家鳴き牌
-                    $nakihai = explode(',',$haipai->player1_nakihai);
-                    foreach($nakihai as $val){
-                        if($val != null){
-                            $img_path= asset("/img/hai/" . $val . ".png");
+            @if(Session::get('player_no') =="player1" || Session::get('player_no') =="player2")
+                @if(Session::get('player_no') =="player1")
+                    {{$game_status->user2}}<br>
+                    持ち点 {{$game_status->player2_ten}}<br><br>
+                    <?php
+                        //下家鳴き牌
+                        $nakihai = explode(',',$haipai->player2_nakihai);
+                        foreach($nakihai as $val){
+                            if($val != null){
+                                $img_path= asset("/img/hai/" . $val . ".png");
+                                echo "<img class=\"rotate2\" src= " . $img_path . "><br>";
+                            }
+                        }
+                    ?>
+                    <?php
+                        //下家手牌
+                        $tehai = explode(',',$haipai->player2_hai);
+                        foreach($tehai as $val){
+                            $img_path= asset("/img/hai/yoko.png");
                             echo "<img class=\"rotate2\" src= " . $img_path . "><br>";
                         }
-                    }
-                ?>
-                 <?php
-                    //下家手牌
-                    $tehai = explode(',',$haipai->player1_hai);
-                    foreach($tehai as $val){
-                        $img_path= asset("/img/hai/yoko.png");
-                        echo "<img class=\"rotate2\" src= " . $img_path . "><br>";
-                    }
-                ?><br>
+                    ?><br>
+                @endif
+                @if(Session::get('player_no') =="player2")
+                    {{$game_status->user3}}<br>
+                    持ち点 {{$game_status->player3_ten}}<br><br>
+                    <?php
+                        //下家鳴き牌
+                        $nakihai = explode(',',$haipai->player1_nakihai);
+                        foreach($nakihai as $val){
+                            if($val != null){
+                                $img_path= asset("/img/hai/" . $val . ".png");
+                                echo "<img class=\"rotate2\" src= " . $img_path . "><br>";
+                            }
+                        }
+                    ?>
+                    <?php
+                        //下家手牌
+                        $tehai = explode(',',$haipai->player1_hai);
+                        foreach($tehai as $val){
+                            $img_path= asset("/img/hai/yoko.png");
+                            echo "<img class=\"rotate2\" src= " . $img_path . "><br>";
+                        }
+                    ?><br>
+                @endif
             @endif
         </aside>
         </main>
@@ -649,9 +688,12 @@
             if(Session::get('player_no') =="player3"){
                 $tehai = explode(',',$haipai->player3_hai);
             }
+            $cnt = 0;
             foreach($tehai as $val){
+                $cnt++;
+                $id = "id=\"tehai_" . $cnt . "\""; 
                 $img_path= asset("/img/hai/" . $val . ".png");
-                echo "<img src= " . $img_path . ">";
+                echo "<img " . $id . "value= \"". $val . "\" src= " . $img_path . ">";
             }
             echo "<span>&nbsp;&nbsp;</span>";
         ?>
