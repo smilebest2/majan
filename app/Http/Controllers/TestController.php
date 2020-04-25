@@ -77,28 +77,112 @@ class TestController extends Controller
         foreach($haipai_nokorihai as $val){
             $haipai_data .= $val .",";
         }
-        $nokori_data = substr($haipai_data, 0, -1); 
-        Log::debug($nokori_data);
+        $nokori_data = substr($haipai_data, 0, -1);
         $tumohai = substr($haipai->nokori_hai,0,2);
+        Log::debug($tumohai);
+        $result = DB::table('haipai')
+        ->where('game_id', $request->session()->get('game_id'))
+        ->update([
+            'nokori_hai'=> $nokori_data,
+            'tsumo_ban'=> $request->session()->get('player_no') . "_tumo"
+        ]);
+        
+        if($game_status->status == 1){
+            $res = ['result'=>'OK','message'=>$tumohai];
+            $result = json_encode($res);
+            return $result;
+        }else{
+            $res = ['result'=>'NG','message'=>'NG'];
+            $result = json_encode($res);
+            return $result;
+        }
+    }
+    public function sutehai (Request $request) 
+    {
+        Log::debug($request);
+
+        $haipai = DB::table('haipai')->where('game_id',$request->session()->get('game_id'))->first();
         if($request->session()->get('player_no') == "player1"){
-            $p1_hai = $haipai->player1_hai;
+            $sutehai = $haipai->player1_sutehai . "," . $request['sutehai'];
+            if($request['tumohai'] != ""){
+                $player1_hai = explode(',',$haipai->player1_hai);
+                $dupe = "";
+                $hai_data = "";
+                foreach($player1_hai as $val){
+                    if($val == $request['sutehai'] && $dupe == ""){
+                        $dupe = "dupe";
+                        $hai_data .= $request['tumohai'] . ",";
+                    }else{
+                        $hai_data .= $val . ",";
+                    }
+                }
+                $p_hai = substr($hai_data, 0, -1);
+            }else{
+                $p_hai = $haipai->player1_hai;
+            }
             $result = DB::table('haipai')
             ->where('game_id', $request->session()->get('game_id'))
             ->update([
-                'nokori_hai'=>$nokori_data
+                'player1_hai'=>$p_hai,
+                'player1_sutehai'=>$sutehai,
+                'tsumo_ban'=> "player2"
+            ]);
+        }
+        if($request->session()->get('player_no') == "player2"){
+            $sutehai = $haipai->player2_sutehai . "," . $request['sutehai'];
+            if($request['tumohai'] != ""){
+                $player2_hai = explode(',',$haipai->player2_hai);
+                $dupe = "";
+                $hai_data = "";
+                foreach($player2_hai as $val){
+                    if($val == $request['sutehai'] && $dupe == ""){
+                        $dupe = "dupe";
+                        $hai_data .= $request['tumohai'] . ",";
+                    }else{
+                        $hai_data .= $val . ",";
+                    }
+                }
+                $p_hai = substr($hai_data, 0, -1);
+            }else{
+                $p_hai = $haipai->player2_hai;
+            }
+            $result = DB::table('haipai')
+            ->where('game_id', $request->session()->get('game_id'))
+            ->update([
+                'player2_hai'=>$p_hai,
+                'player2_sutehai'=>$sutehai,
+                'tsumo_ban'=> "player3"
+            ]);
+        }
+        if($request->session()->get('player_no') == "player3"){
+            $sutehai = $haipai->player3_sutehai . "," . $request['sutehai'];
+            if($request['tumohai'] != ""){
+                $player3_hai = explode(',',$haipai->player3_hai);
+                $dupe = "";
+                $hai_data = "";
+                foreach($player3_hai as $val){
+                    if($val == $request['sutehai'] && $dupe == ""){
+                        $dupe = "dupe";
+                        $hai_data .= $request['tumohai'] . ",";
+                    }else{
+                        $hai_data .= $val . ",";
+                    }
+                }
+                $p_hai = substr($hai_data, 0, -1);
+            }else{
+                $p_hai = $haipai->player1_hai;
+            }
+            $result = DB::table('haipai')
+            ->where('game_id', $request->session()->get('game_id'))
+            ->update([
+                'player3_hai'=>$p_hai,
+                'player3_sutehai'=>$sutehai,
+                'tsumo_ban'=> "player1"
             ]);
         }
         
-        if($request->session()->get('player_no') == "player3"){
-            $p1_hai = $haipai->player1_hai;
-            $result = DB::table('haipai')
-            ->where('game_id', $request->session()->get('game_id'))
-            ->update([
-                'nokori_hai'=>$nokori_data
-            ]);
-        }
-        if($game_status->status == 1){
-            $res = ['result'=>'OK','message'=>$tumohai];
+        if($result){
+            $res = ['result'=>'OK','message'=>'OK'];
             $result = json_encode($res);
             return $result;
         }else{
@@ -175,7 +259,8 @@ class TestController extends Controller
             'player3_nakihai' => "",
             'player3_ponkan' => "",
             'dorayama_hai' => $dora_yama,
-            'nokori_hai' => $nokori_hai
+            'nokori_hai' => $nokori_hai,
+            'tsumo_ban' =>"player1"
         ]);
         $haipai_id = DB::getPdo()->lastInsertId();
         DB::table('game_status')->where('id',$game_id)->update([
