@@ -34,25 +34,6 @@
                                     $('#tumo_span').show();
                                     ck_flg = "tumo_ban";
                                 }
-                                if(player == "player1"){
-                                    var hai_data = data.message.player1_hai;
-                                    var hai_arr = hai_data.split(',');
-                                }
-                                if(player == "player2"){
-                                    var hai_data = data.message.player2_hai;
-                                    var hai_arr = hai_data.split(',');
-                                }
-                                if(player == "player3"){
-                                    var hai_data = data.message.player3_hai;
-                                    var hai_arr = hai_data.split(',');
-                                }
-                                for(var i=0; i < hai_arr.length; i++){
-                                    var select_id = "#tehai_" + i;
-                                    var img_path = $(select_id).attr('src');
-                                    var path = img_path.slice(0,-6);
-                                    var new_path = path + hai_arr[i] + ".png";
-                                    $(select_id).attr('src', new_path);
-                                }
                                 if(data.message.player1_sutehai != ""){
                                     var sutehai_data = data.message.player1_sutehai;
                                     var sutehai_arr = sutehai_data.split(',');
@@ -158,6 +139,25 @@
                             if (data.result == "OK") {
                                 ck_flg = "";
                                 $('#tehai_tumo').hide();
+                                if(player == "player1"){
+                                    var hai_data = data.message.player1_hai;
+                                    var hai_arr = hai_data.split(',');
+                                }
+                                if(player == "player2"){
+                                    var hai_data = data.message.player2_hai;
+                                    var hai_arr = hai_data.split(',');
+                                }
+                                if(player == "player3"){
+                                    var hai_data = data.message.player3_hai;
+                                    var hai_arr = hai_data.split(',');
+                                }
+                                for(var i=0; i < hai_arr.length; i++){
+                                    var select_id = "#tehai_" + i;
+                                    var img_path = $(select_id).attr('src');
+                                    var path = img_path.slice(0,-6);
+                                    var new_path = path + hai_arr[i] + ".png";
+                                    $(select_id).attr('src', new_path);
+                                }
                             }
                         })
                         // Ajaxリクエストが失敗した場合

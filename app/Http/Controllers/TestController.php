@@ -183,7 +183,7 @@ class TestController extends Controller
         }
         
         if($result){
-            $res = ['result'=>'OK','message'=>'OK'];
+            $res = ['result'=>'OK','message'=>$haipai];
             $result = json_encode($res);
             return $result;
         }else{
