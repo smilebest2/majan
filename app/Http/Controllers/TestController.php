@@ -101,18 +101,29 @@ class TestController extends Controller
     {
         $haipai = DB::table('haipai')->where('game_id',$request->session()->get('game_id'))->first();
         if($request->session()->get('player_no') == "player1"){
-            $sutehai_data = $haipai->player1_sutehai . "," . $request['sutehai'];
+            if($haipai->player1_sutehai !=""){
+                $sutehai_data = $haipai->player1_sutehai . "," . $request['sutehai'];
+            }else{
+                $sutehai_data = $request['sutehai'];
+            }
             $player_hai = explode(',',$haipai->player1_hai);
         }
         if($request->session()->get('player_no') == "player2"){
-            $sutehai_data = $haipai->player2_sutehai . "," . $request['sutehai'];
+            if($haipai->player1_sutehai !=""){
+                $sutehai_data = $haipai->player2_sutehai . "," . $request['sutehai'];
+            }else{
+                $sutehai_data = $request['sutehai'];
+            }
             $player_hai = explode(',',$haipai->player2_hai);
         }
         if($request->session()->get('player_no') == "player3"){
-            $sutehai_data = $haipai->player3_sutehai . "," . $request['sutehai'];
+            if($haipai->player1_sutehai !=""){
+                $sutehai_data = $haipai->player3_sutehai . "," . $request['sutehai'];
+            }else{
+                $sutehai_data = $request['sutehai'];
+            }
             $player_hai = explode(',',$haipai->player3_hai);
         }
-        $sutehai = ltrim($sutehai_data, ',');
         if($request['tumohai'] != ""){
             $dupe = "";
             $hai_data = "";
