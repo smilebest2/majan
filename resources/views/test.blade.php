@@ -34,6 +34,25 @@
                                     $('#tumo_span').show();
                                     ck_flg = "tumo_ban";
                                 }
+                                if(player == "player1"){
+                                    var hai_data = data.message.player1_hai;
+                                    var hai_arr = hai_data.split(',');
+                                }
+                                if(player == "player2"){
+                                    var hai_data = data.message.player2_hai;
+                                    var hai_arr = hai_data.split(',');
+                                }
+                                if(player == "player3"){
+                                    var hai_data = data.message.player3_hai;
+                                    var hai_arr = hai_data.split(',');
+                                }
+                                for(var i=0; i < hai_arr.length; i++){
+                                    var select_id = "#tehai_" + i;
+                                    var img_path = $(select_id).attr('src');
+                                    var path = img_path.slice(0,-6);
+                                    var new_path = path + hai_arr[i] + ".png";
+                                    $(select_id).attr('src', new_path);
+                                }
                                 if(data.message.player1_sutehai != ""){
                                     var sutehai_data = data.message.player1_sutehai;
                                     var sutehai_arr = sutehai_data.split(',');
@@ -47,7 +66,7 @@
                                     if(player == "player3"){
                                         sutehai_disp = "#toimen_sutehai_";
                                     }
-                                    for( var i=0; i < sutehai_arr.length; i++){
+                                    for(var i=0; i < sutehai_arr.length; i++){
                                         var select_id = sutehai_disp + i;
                                         var img_path = $(select_id).attr('src');
                                         var path = img_path.slice(0,-6);
@@ -68,7 +87,7 @@
                                     if(player == "player3"){
                                         sutehai_disp = "#kamitya_sutehai_";
                                     }
-                                    for( var i=0; i < sutehai_arr.length; i++){
+                                    for(var i=0; i < sutehai_arr.length; i++){
                                         var select_id = sutehai_disp + i;
                                         var img_path = $(select_id).attr('src');
                                         var path = img_path.slice(0,-6);
@@ -89,7 +108,7 @@
                                     if(player == "player3"){
                                         sutehai_disp = "#player_sutehai_";
                                     }
-                                    for( var i=0; i < sutehai_arr.length; i++){
+                                    for(var i=0; i < sutehai_arr.length; i++){
                                         var select_id = sutehai_disp + i;
                                         var img_path = $(select_id).attr('src');
                                         var path = img_path.slice(0,-6);
@@ -574,7 +593,7 @@
             }
             // ツモ牌
             $img_path= asset("/img/hai/0h.png");
-            echo "<img style=\"display:none;\" id=\"tehai_tumo\" value= \"0h\" src= " . $img_path . ">";
+            echo "<span>&nbsp;&nbsp;</span><img style=\"display:none;\" id=\"tehai_tumo\" value= \"0h\" src= " . $img_path . ">";
             echo "<span>&nbsp;&nbsp;</span>";
         ?>
         <?php
