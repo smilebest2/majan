@@ -605,13 +605,12 @@ alert(data.message);
             }
         ?>
         <br><br>
-        @if($haipai->tsumo_ban == Session::get('player_no'))
-            <button id="tumo" type="button">ツモ</button>
-        @endif
-        <button id="lon" type="button">ロン</button>
-        <button id="pon" type="button">ポン</button>
-        <button id="kan" type="button">カン</button>
-        <button id="haitumo" type="button">牌ツモ</button>
+
+        <button style="display:none;" id="tumo" type="button">ツモ</button>
+        <button style="display:none;" id="lon" type="button">ロン</button>
+        <button style="display:none;" id="pon" type="button">ポン</button>
+        <button style="display:none;" id="kan" type="button">カン</button>
+        <button style="display:none;" id="haitumo" type="button">牌ツモ</button>
         </footer>
     </body>
 </html>
