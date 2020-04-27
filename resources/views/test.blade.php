@@ -12,6 +12,7 @@
         $(document).ready(function(){
             var ck_flg = "";
             var update_time = "{{$haipai->update_time}}";
+            var player = "{{Session::get('player_no')}}";
             setInterval(function(){
                 if(ck_flg != "tumo_ban"){
                     $.ajaxSetup({
@@ -29,7 +30,6 @@
                         .done(function(data) {
                             if (data.result == "OK") {
                                 update_time = data.message.update_time;
-                                var player = "{{Session::get('player_no')}}";
                                 if(data.message.tsumo_ban == player){
                                     $('#tumo_span').show();
                                     ck_flg = "tumo_ban";
