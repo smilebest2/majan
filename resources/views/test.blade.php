@@ -462,8 +462,8 @@
                     $dorayama = "<td><img src= " . $img_path . "></td><td><img src= " . $img_path . "></td><td><img src= " . $dora_path . "></td><td><img src= " . $dora_path1 . "></td><td><img src= " . $dora_path2 . "></td><td><img src= " . $dora_path3 . "></td><td><img src= " . $dora_path4 . "></td><td><img src= " . $dora_path5 . "></td>";
                 }
             ?>
-            <font color="#ff9999">{{$ba}}&nbsp;{{$kyoku[1]}}局&nbsp;&nbsp;{{$kyoku[2]}}本場</font><br>
-            <font color="#ff9999">残り牌{{count($nokori)}}</font><br>
+            <font color="#ff9999"><span id ="ba">{{$ba}}</span>&nbsp;<span id ="kyoku">{{$kyoku[1]}}</span>局&nbsp;&nbsp;<span id ="honba">{{$kyoku[2]}}</span>本場</font><br>
+            <font color="#ff9999">残り牌<span id ="nokori_hai">{{count($nokori)}}</span></font><br>
             <?php echo $dorayama; ?> 
             </article>
             {{-- 下家捨て配 --}}

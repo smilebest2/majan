@@ -181,7 +181,7 @@ class TestController extends Controller
                 'tsumo_ban'=> "player1"
             ]);
         }
-        
+        $haipai = DB::table('haipai')->where('game_id',$request->session()->get('game_id'))->first();
         if($result){
             $res = ['result'=>'OK','message'=>$haipai];
             $result = json_encode($res);
