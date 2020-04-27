@@ -128,7 +128,8 @@ class TestController extends Controller
             ]);
         }
         if($request->session()->get('player_no') == "player2"){
-            $sutehai = $haipai->player2_sutehai . "," . $request['sutehai'];
+            $sutehai_data = $haipai->player2_sutehai . "," . $request['sutehai'];
+            $sutehai = ltrim($sutehai_data, ',');
             if($request['tumohai'] != ""){
                 $player2_hai = explode(',',$haipai->player2_hai);
                 $dupe = "";
@@ -154,7 +155,8 @@ class TestController extends Controller
             ]);
         }
         if($request->session()->get('player_no') == "player3"){
-            $sutehai = $haipai->player3_sutehai . "," . $request['sutehai'];
+            $sutehai_data = $haipai->player3_sutehai . "," . $request['sutehai'];
+            $sutehai = ltrim($sutehai_data, ',');
             if($request['tumohai'] != ""){
                 $player3_hai = explode(',',$haipai->player3_hai);
                 $dupe = "";
