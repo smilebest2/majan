@@ -304,6 +304,7 @@ class TestController extends Controller
     {
         $hai = explode(',',$player_hai_data);
         $hai_data = "";
+        sort($hai);
         foreach($hai as $val){
             $num = substr($val, 0, 1);
             $type = substr($val, 1, 1);
