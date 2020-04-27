@@ -101,7 +101,8 @@ class TestController extends Controller
     {
         $haipai = DB::table('haipai')->where('game_id',$request->session()->get('game_id'))->first();
         if($request->session()->get('player_no') == "player1"){
-            $sutehai = $haipai->player1_sutehai . "," . $request['sutehai'];
+            $sutehai_data = $haipai->player1_sutehai . "," . $request['sutehai'];
+            $sutehai = ltrim($sutehai_data, ',');
             if($request['tumohai'] != ""){
                 $player1_hai = explode(',',$haipai->player1_hai);
                 $dupe = "";
@@ -114,8 +115,7 @@ class TestController extends Controller
                         $hai_data .= $val . ",";
                     }
                 }
-                $sento_del = substr($hai_data, 1);
-                $p_hai = substr($sento_del, 0, -1);
+                $p_hai = substr($hai_data, 0, -1);
             }else{
                 $p_hai = $haipai->player1_hai;
             }
