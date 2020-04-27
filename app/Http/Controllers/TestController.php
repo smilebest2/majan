@@ -276,9 +276,13 @@ class TestController extends Controller
         $haipai = DB::table('haipai')->where('game_id',$request->session()->get('game_id'))->first();
         
         if($request['update_time'] != $haipai->update_time){
-            $res = ['result'=>'user_time','message'=>$haipai];
+            if($request->session()->get('player_no') == $haipai->tsumo_ban){
+                $res = ['result'=>'user_time','message'=>$haipai];
+            }else{
+                $res = ['result'=>'other_time','message'=>$haipai];
+            }
         }else{
-            $res = ['result'=>'other_time','message'=>$haipai];
+            $res = ['result'=>'other_time','message'=>"not_change"];
         }
         $result = json_encode($res);
         return $result;

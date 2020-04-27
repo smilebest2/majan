@@ -10,15 +10,8 @@
         <script src="{{asset('/js/jquery-3.5.0.min.js')}}"></script>
         <script>
         $(document).ready(function(){
+            var ck_flg = "";
             setInterval(function(){
-                var ck_flg = "";
-                var player_tumo = "{{Session::get('player_no')}}" + "_tumo";
-                if("{{$haipai->tsumo_ban}}" == "{{Session::get('player_no')}}"){
-                    $('#tumo_span').show();
-                }
-                if("{{$haipai->tsumo_ban}}" == player_tumo){
-                    ck_flg = "tumo_ban";
-                }
                 if(ck_flg != "tumo_ban"){
                     var update_time = "{{$haipai->update_time}}";
                     $.ajaxSetup({
@@ -34,9 +27,9 @@
                         })
                         // Ajaxリクエストが成功した場合
                         .done(function(data) {
-
                             if (data.result == "user_time") {
-alert(data.message);
+                               $('#tumo_span').show();
+                               ck_flg = "tumo_ban";
                             }
                             if (data.result == "other_time") {
                                 var player = "{{Session::get('player_no')}}";
@@ -143,7 +136,7 @@ alert(data.message);
                         // Ajaxリクエストが成功した場合
                         .done(function(data) {
                             if (data.result == "OK") {
-                            location.reload();
+                                ck_flg = "";
                             }
                         })
                         // Ajaxリクエストが失敗した場合
@@ -172,7 +165,7 @@ alert(data.message);
                 .done(function(data) {
                     if (data.result == "OK") {
                         $('#tumo_span').hide();
-                        location.reload();
+                        ck_flg = "";
                     }
                 })
                 // Ajaxリクエストが失敗した場合
@@ -211,6 +204,7 @@ alert(data.message);
                             });
                         }
                         $('#tumo_span').hide();
+                        ck_flg = "";
                 })
                 // Ajaxリクエストが失敗した場合
                 .fail(function(data) {
