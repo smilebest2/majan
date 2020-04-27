@@ -276,11 +276,7 @@ class TestController extends Controller
         $haipai = DB::table('haipai')->where('game_id',$request->session()->get('game_id'))->first();
         
         if($request['update_time'] != $haipai->update_time){
-            if($request->session()->get('player_no') == $haipai->tsumo_ban){
-                $res = ['result'=>'user_time','message'=>$haipai];
-            }else{
-                $res = ['result'=>'other_time','message'=>$haipai];
-            }
+            $res = ['result'=>'OK','message'=>$haipai];
         }else{
             $res = ['result'=>'other_time','message'=>"not_change"];
         }

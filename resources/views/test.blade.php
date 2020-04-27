@@ -27,12 +27,12 @@
                         })
                         // Ajaxリクエストが成功した場合
                         .done(function(data) {
-                            if (data.result == "user_time") {
-                               $('#tumo_span').show();
-                               ck_flg = "tumo_ban";
-                            }
-                            if (data.result == "other_time") {
+                            if (data.result == "OK") {
                                 var player = "{{Session::get('player_no')}}";
+                                if(data.message.tsumo_ban == player){
+                                    $('#tumo_span').show();
+                                    ck_flg = "tumo_ban";
+                                }
                                 if(data.message.player1_sutehai != ""){
                                     var sutehai_data = data.message.player1_sutehai;
                                     var sutehai_arr = sutehai_data.split(',');
