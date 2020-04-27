@@ -157,6 +157,7 @@
                                     var path = img_path.slice(0,-6);
                                     var new_path = path + hai_arr[i] + ".png";
                                     $(select_id).attr('src', new_path);
+                                    $('#tehai_tumo').attr('value', hai_arr[i]);
                                 }
                             }
                         })
