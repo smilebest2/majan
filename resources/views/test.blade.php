@@ -103,7 +103,7 @@ alert(data.message);
                                         $(select_id).attr('src', new_path);
                                     }
                                 }
-                                if(data.message.tumo_ban == player){
+                                if(data.message.tsumo_ban == player){
                                     $('#tehai_tumo').show();
                                 }else{
                                     $('#tehai_tumo').hide();
