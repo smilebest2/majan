@@ -189,11 +189,11 @@ class TestController extends Controller
         }
         if($request->session()->get('player_no') == "player2"){
             $player_hai_data = $haipai->player2_hai;
-            $haipai_data['player1_hai'] = $this->seiretu($player_hai_data);
+            $haipai_data['player2_hai'] = $this->seiretu($player_hai_data);
         }
         if($request->session()->get('player_no') == "player3"){
             $player_hai_data = $haipai->player3_hai;
-            $haipai_data['player1_hai'] = $this->seiretu($player_hai_data);
+            $haipai_data['player3_hai'] = $this->seiretu($player_hai_data);
         }
         $nokori = explode(',',$haipai->nokori_hai);
         $haipai_data['player1_sutehai'] = $haipai->player1_sutehai;
