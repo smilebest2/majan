@@ -11,9 +11,9 @@
         <script>
         $(document).ready(function(){
             var ck_flg = "";
+            var update_time = "{{$haipai->update_time}}";
             setInterval(function(){
                 if(ck_flg != "tumo_ban"){
-                    var update_time = "{{$haipai->update_time}}";
                     $.ajaxSetup({
                             headers: {
                                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -28,6 +28,7 @@
                         // Ajaxリクエストが成功した場合
                         .done(function(data) {
                             if (data.result == "OK") {
+                                update_time = data.message.update_time;
                                 var player = "{{Session::get('player_no')}}";
                                 if(data.message.tsumo_ban == player){
                                     $('#tumo_span').show();

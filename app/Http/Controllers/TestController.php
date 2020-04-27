@@ -275,11 +275,11 @@ class TestController extends Controller
         $game_status = DB::table('game_status')->where('id',$request->session()->get('game_id'))->first();
         $haipai = DB::table('haipai')->where('game_id',$request->session()->get('game_id'))->first();
         
-        if($request['update_time'] != $haipai->update_time){
+//        if($request['update_time'] != $haipai->update_time){
             $res = ['result'=>'OK','message'=>$haipai];
-        }else{
-            $res = ['result'=>'other_time','message'=>"not_change"];
-        }
+//        }else{
+//            $res = ['result'=>'other_time','message'=>"not_change"];
+//        }
         $result = json_encode($res);
         return $result;
     }
