@@ -104,9 +104,9 @@ alert(data.message);
                                     }
                                 }
                                 if(data.message.tsumo_ban == player){
-                                    $('#tehai_tumo').show();
+                                    $('#tumo').show();
                                 }else{
-                                    $('#tehai_tumo').hide();
+                                    $('#tumo').hide();
                                 }
                             }
                         })
