@@ -14,7 +14,7 @@
                 var ck_flg = "";
                 var player_tumo = "{{Session::get('player_no')}}" + "_tumo";
                 if("{{$haipai->tsumo_ban}}" == "{{Session::get('player_no')}}"){
-                    ck_flg = "tumo_ban";
+                    $('#tumo_span').show();
                 }
                 if("{{$haipai->tsumo_ban}}" == player_tumo){
                     ck_flg = "tumo_ban";
@@ -103,11 +103,6 @@ alert(data.message);
                                         $(select_id).attr('src', new_path);
                                     }
                                 }
-                                if(data.message.tsumo_ban == player){
-                                    $('#tumo_span').show();
-                                }else{
-                                    $('#tumo_span').hide();
-                                }
                             }
                         })
                         // Ajaxリクエストが失敗した場合
@@ -176,7 +171,7 @@ alert(data.message);
                 // Ajaxリクエストが成功した場合
                 .done(function(data) {
                     if (data.result == "OK") {
-                        $('#tehai_tumo').hide();
+                        $('#tumo_span').hide();
                         location.reload();
                     }
                 })
@@ -215,6 +210,7 @@ alert(data.message);
                                 $(this).css('opacity', '1');
                             });
                         }
+                        $('#tumo_span').hide();
                 })
                 // Ajaxリクエストが失敗した場合
                 .fail(function(data) {
