@@ -157,6 +157,7 @@
                         .done(function(data) {
                             if (data.result == "OK") {
                                 ck_flg = "";
+                                $('#tehai_tumo').hide();
                             }
                         })
                         // Ajaxリクエストが失敗した場合
@@ -185,6 +186,7 @@
                 .done(function(data) {
                     if (data.result == "OK") {
                         $('#tumo_span').hide();
+                        $('#tehai_tumo').hide();
                         ck_flg = "";
                     }
                 })
