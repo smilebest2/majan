@@ -97,6 +97,7 @@
                                         $(select_id).attr('src', new_path);
                                     }
                                 }
+                                $('#nokori_hai').text(data.message.nokori_hai);
                             }
                         })
                         // Ajaxリクエストが失敗した場合

@@ -115,7 +115,8 @@ class TestController extends Controller
                         $hai_data .= $val . ",";
                     }
                 }
-                $p_hai = substr($hai_data, 0, -1);
+                $p_hai_data = substr($hai_data, 0, -1);
+                $p_hai = $this->seiretu($p_hai_data);
             }else{
                 $p_hai = $haipai->player1_hai;
             }
@@ -142,7 +143,8 @@ class TestController extends Controller
                         $hai_data .= $val . ",";
                     }
                 }
-                $p_hai = substr($hai_data, 0, -1);
+                $p_hai_data = substr($hai_data, 0, -1);
+                $p_hai = $this->seiretu($p_hai_data);
             }else{
                 $p_hai = $haipai->player2_hai;
             }
@@ -169,7 +171,8 @@ class TestController extends Controller
                         $hai_data .= $val . ",";
                     }
                 }
-                $p_hai = substr($hai_data, 0, -1);
+                $p_hai_data = substr($hai_data, 0, -1);
+                $p_hai = $this->seiretu($p_hai_data);
             }else{
                 $p_hai = $haipai->player1_hai;
             }
@@ -184,16 +187,13 @@ class TestController extends Controller
         $haipai = DB::table('haipai')->where('game_id',$request->session()->get('game_id'))->first();
         $haipai_data = array();
         if($request->session()->get('player_no') == "player1"){
-            $player_hai_data = $haipai->player1_hai;
-            $haipai_data['player1_hai'] = $this->seiretu($player_hai_data);
+            $haipai_data['player1_hai'] = $haipai->player1_hai;
         }
         if($request->session()->get('player_no') == "player2"){
-            $player_hai_data = $haipai->player2_hai;
-            $haipai_data['player2_hai'] = $this->seiretu($player_hai_data);
+            $haipai_data['player2_hai'] = $haipai->player2_hai;
         }
         if($request->session()->get('player_no') == "player3"){
-            $player_hai_data = $haipai->player3_hai;
-            $haipai_data['player3_hai'] = $this->seiretu($player_hai_data);
+            $haipai_data['player3_hai'] = $haipai->player3_hai;
         }
         $nokori = explode(',',$haipai->nokori_hai);
         $haipai_data['player1_sutehai'] = $haipai->player1_sutehai;
