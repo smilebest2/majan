@@ -231,6 +231,7 @@
                             });
                         }
                         $('#tumo_span').hide();
+                        ck_flg = "tumo_ban";
                 })
                 // Ajaxリクエストが失敗した場合
                 .fail(function(data) {
