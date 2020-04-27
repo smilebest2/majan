@@ -199,12 +199,12 @@ class TestController extends Controller
         $haipai_data['player1_sutehai'] = $haipai->player1_sutehai;
         $haipai_data['player1_nakihai'] = $haipai->player1_nakihai;
         $haipai_data['player1_ponkan'] = $haipai->player1_ponkan;
-        $haipai_data['player2_sutehai'] = $haipai->player1_sutehai;
-        $haipai_data['player2_nakihai'] = $haipai->player1_nakihai;
-        $haipai_data['player2_ponkan'] = $haipai->player1_ponkan;
-        $haipai_data['player3_sutehai'] = $haipai->player1_sutehai;
-        $haipai_data['player3_nakihai'] = $haipai->player1_nakihai;
-        $haipai_data['player3_ponkan'] = $haipai->player1_ponkan;
+        $haipai_data['player2_sutehai'] = $haipai->player2_sutehai;
+        $haipai_data['player2_nakihai'] = $haipai->player2_nakihai;
+        $haipai_data['player2_ponkan'] = $haipai->player2_ponkan;
+        $haipai_data['player3_sutehai'] = $haipai->player3_sutehai;
+        $haipai_data['player3_nakihai'] = $haipai->player3_nakihai;
+        $haipai_data['player3_ponkan'] = $haipai->player3_ponkan;
         $haipai_data['nokori_hai'] = count($nokori);
         $haipai_data['tsumo_ban'] = $haipai->tsumo_ban;
 
@@ -356,12 +356,12 @@ class TestController extends Controller
         $haipai_data['player1_sutehai'] = $haipai->player1_sutehai;
         $haipai_data['player1_nakihai'] = $haipai->player1_nakihai;
         $haipai_data['player1_ponkan'] = $haipai->player1_ponkan;
-        $haipai_data['player2_sutehai'] = $haipai->player1_sutehai;
-        $haipai_data['player2_nakihai'] = $haipai->player1_nakihai;
-        $haipai_data['player2_ponkan'] = $haipai->player1_ponkan;
-        $haipai_data['player3_sutehai'] = $haipai->player1_sutehai;
-        $haipai_data['player3_nakihai'] = $haipai->player1_nakihai;
-        $haipai_data['player3_ponkan'] = $haipai->player1_ponkan;
+        $haipai_data['player2_sutehai'] = $haipai->player2_sutehai;
+        $haipai_data['player2_nakihai'] = $haipai->player2_nakihai;
+        $haipai_data['player2_ponkan'] = $haipai->player2_ponkan;
+        $haipai_data['player3_sutehai'] = $haipai->player3_sutehai;
+        $haipai_data['player3_nakihai'] = $haipai->player3_nakihai;
+        $haipai_data['player3_ponkan'] = $haipai->player3_ponkan;
         $haipai_data['nokori_hai'] = count($nokori);
         $haipai_data['tsumo_ban'] = $haipai->tsumo_ban;
         
