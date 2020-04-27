@@ -104,9 +104,9 @@ alert(data.message);
                                     }
                                 }
                                 if(data.message.tsumo_ban == player){
-                                    $('#tumo').show();
+                                    $('#tumo_span').show();
                                 }else{
-                                    $('#tumo').hide();
+                                    $('#tumo_span').hide();
                                 }
                             }
                         })
@@ -606,11 +606,11 @@ alert(data.message);
         ?>
         <br><br>
 
-        <button style="display:none;" id="tumo" type="button">ツモ</button>
-        <button style="display:none;" id="lon" type="button">ロン</button>
-        <button style="display:none;" id="pon" type="button">ポン</button>
-        <button style="display:none;" id="kan" type="button">カン</button>
-        <button style="display:none;" id="haitumo" type="button">牌ツモ</button>
+        <span id="tumo_span" style="display:none;"><button id="tumo" type="button">ツモ</button></span>
+        <span><button id="lon" type="button">ロン</button></span>
+        <span><button id="pon" type="button">ポン</button></span>
+        <span><button id="kan" type="button">カン</button></span>
+        <span><button id="haitumo" type="button">牌ツモ</button></span>
         </footer>
     </body>
 </html>
