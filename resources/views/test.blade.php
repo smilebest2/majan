@@ -586,10 +586,10 @@
             }
             $cnt = 0;
             foreach($tehai as $val){
-                $cnt++;
                 $id = "id=\"tehai_" . $cnt . "\""; 
                 $img_path= asset("/img/hai/" . $val . ".png");
                 echo "<img " . $id . "value= \"". $val . "\" src= " . $img_path . ">";
+                $cnt++;
             }
             // ツモ牌
             $img_path= asset("/img/hai/0h.png");
