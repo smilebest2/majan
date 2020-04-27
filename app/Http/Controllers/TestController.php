@@ -341,9 +341,32 @@ class TestController extends Controller
     {
         $game_status = DB::table('game_status')->where('id',$request->session()->get('game_id'))->first();
         $haipai = DB::table('haipai')->where('game_id',$request->session()->get('game_id'))->first();
+
+        $haipai_data = array();
+        if($request->session()->get('player_no') == "player1"){
+            $haipai_data['player1_hai'] = $haipai->player1_hai;
+        }
+        if($request->session()->get('player_no') == "player2"){
+            $haipai_data['player2_hai'] = $haipai->player2_hai;
+        }
+        if($request->session()->get('player_no') == "player3"){
+            $haipai_data['player3_hai'] = $haipai->player3_hai;
+        }
+        $nokori = explode(',',$haipai->nokori_hai);
+        $haipai_data['player1_sutehai'] = $haipai->player1_sutehai;
+        $haipai_data['player1_nakihai'] = $haipai->player1_nakihai;
+        $haipai_data['player1_ponkan'] = $haipai->player1_ponkan;
+        $haipai_data['player2_sutehai'] = $haipai->player1_sutehai;
+        $haipai_data['player2_nakihai'] = $haipai->player1_nakihai;
+        $haipai_data['player2_ponkan'] = $haipai->player1_ponkan;
+        $haipai_data['player3_sutehai'] = $haipai->player1_sutehai;
+        $haipai_data['player3_nakihai'] = $haipai->player1_nakihai;
+        $haipai_data['player3_ponkan'] = $haipai->player1_ponkan;
+        $haipai_data['nokori_hai'] = count($nokori);
+        $haipai_data['tsumo_ban'] = $haipai->tsumo_ban;
         
 //        if($request['update_time'] != $haipai->update_time){
-            $res = ['result'=>'OK','message'=>$haipai];
+            $res = ['result'=>'OK','message'=>$haipai_data];
 //        }else{
 //            $res = ['result'=>'other_time','message'=>"not_change"];
 //        }
