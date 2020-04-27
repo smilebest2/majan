@@ -109,7 +109,7 @@ class TestController extends Controller
             $player_hai = explode(',',$haipai->player1_hai);
         }
         if($request->session()->get('player_no') == "player2"){
-            if($haipai->player1_sutehai !=""){
+            if($haipai->player2_sutehai !=""){
                 $sutehai_data = $haipai->player2_sutehai . "," . $request['sutehai'];
             }else{
                 $sutehai_data = $request['sutehai'];
@@ -117,7 +117,7 @@ class TestController extends Controller
             $player_hai = explode(',',$haipai->player2_hai);
         }
         if($request->session()->get('player_no') == "player3"){
-            if($haipai->player1_sutehai !=""){
+            if($haipai->player3_sutehai !=""){
                 $sutehai_data = $haipai->player3_sutehai . "," . $request['sutehai'];
             }else{
                 $sutehai_data = $request['sutehai'];
