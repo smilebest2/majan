@@ -83,7 +83,7 @@
                                         sutehai_disp = "#toimen_sutehai_";
                                     }
                                     if(player == "player2"){
-                                        sutehai_disp = "#simotya_sutehai_";
+                                        sutehai_disp = "#kamitya_sutehai_";
                                     }
                                     if(player == "player3"){
                                         sutehai_disp = "#player_sutehai_";

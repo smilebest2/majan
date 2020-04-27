@@ -139,7 +139,15 @@ class TestController extends Controller
             $player_hai = ltrim($p_hai_data, ',');
             $p_hai = $this->seiretu($player_hai);
         }else{
-            $p_hai = $haipai->player1_hai;
+            if($request->session()->get('player_no') == "player1"){
+                $p_hai = $haipai->player1_hai;
+            }
+            if($request->session()->get('player_no') == "player2"){
+                $p_hai = $haipai->player2_hai;
+            }
+            if($request->session()->get('player_no') == "player3"){
+                $p_hai = $haipai->player3_hai;
+            }
         }
         if($request->session()->get('player_no') == "player1"){
             $result = DB::table('haipai')
