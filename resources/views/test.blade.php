@@ -103,6 +103,11 @@ alert(data.message);
                                         $(select_id).attr('src', new_path);
                                     }
                                 }
+                                if(data.message.tumo_ban == player){
+                                    $('#tehai_tumo').show();
+                                }else{
+                                    $('#tehai_tumo').hide();
+                                }
                             }
                         })
                         // Ajaxリクエストが失敗した場合

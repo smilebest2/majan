@@ -192,10 +192,7 @@ class TestController extends Controller
     }
     public function start (Request $request) 
     {
-//        Log::debug($request->session()->get('game_id'));
-        
         $game_status = DB::table('game_status')->where('id',$request->session()->get('game_id'))->first();
-//        Log::debug($game_status);
         $haipai = DB::table('haipai')->where('game_id',$request->session()->get('game_id'))->first();
 
         return view('test',compact('game_status','haipai'));
