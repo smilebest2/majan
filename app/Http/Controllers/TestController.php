@@ -112,7 +112,7 @@ class TestController extends Controller
             $sutehai_data = $haipai->player3_sutehai . "," . $request['sutehai'];
             $player_hai = explode(',',$haipai->player3_hai);
         }
-
+        $sutehai = ltrim($sutehai_data, ',');
         if($request['tumohai'] != ""){
             $dupe = "";
             $hai_data = "";
