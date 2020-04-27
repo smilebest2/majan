@@ -182,8 +182,34 @@ class TestController extends Controller
             ]);
         }
         $haipai = DB::table('haipai')->where('game_id',$request->session()->get('game_id'))->first();
+        $haipai_data = array();
+        if($request->session()->get('player_no') == "player1"){
+            $player_hai_data = $haipai->player1_hai;
+            $haipai_data['player1_hai'] = $this->seiretu($player_hai_data);
+        }
+        if($request->session()->get('player_no') == "player2"){
+            $player_hai_data = $haipai->player2_hai;
+            $haipai_data['player1_hai'] = $this->seiretu($player_hai_data);
+        }
+        if($request->session()->get('player_no') == "player3"){
+            $player_hai_data = $haipai->player3_hai;
+            $haipai_data['player1_hai'] = $this->seiretu($player_hai_data);
+        }
+        $nokori = explode(',',$haipai->nokori_hai);
+        $haipai_data['player1_sutehai'] = $haipai->player1_sutehai;
+        $haipai_data['player1_nakihai'] = $haipai->player1_nakihai;
+        $haipai_data['player1_ponkan'] = $haipai->player1_ponkan;
+        $haipai_data['player2_sutehai'] = $haipai->player1_sutehai;
+        $haipai_data['player2_nakihai'] = $haipai->player1_nakihai;
+        $haipai_data['player2_ponkan'] = $haipai->player1_ponkan;
+        $haipai_data['player3_sutehai'] = $haipai->player1_sutehai;
+        $haipai_data['player3_nakihai'] = $haipai->player1_nakihai;
+        $haipai_data['player3_ponkan'] = $haipai->player1_ponkan;
+        $haipai_data['nokori_hai'] = count($nokori);
+        $haipai_data['tsumo_ban'] = $haipai->tsumo_ban;
+
         if($result){
-            $res = ['result'=>'OK','message'=>$haipai];
+            $res = ['result'=>'OK','message'=>$haipai_data];
             $result = json_encode($res);
             return $result;
         }else{
@@ -237,10 +263,14 @@ class TestController extends Controller
             }
             $yamahai .= $sento_hai .",";
         }
-        $player1_hai = substr($player1, 0, -1);
-        $player2_hai = substr($player2, 0, -1);
-        $player3_hai = substr($player3, 0, -1);
+        $player1_hai_data = substr($player1, 0, -1);
+        $player2_hai_data = substr($player2, 0, -1);
+        $player3_hai_data = substr($player3, 0, -1);
         $nokori_hai = substr($yamahai, 0, -1);
+        $player1_hai = $this->seiretu($player1_hai_data);
+        $player2_hai = $this->seiretu($player2_hai_data);
+        $player3_hai = $this->seiretu($player3_hai_data);
+        
         DB::table('haipai')->insert([
             'game_id' => $game_id,
             'haipai' => $haipai,
@@ -269,6 +299,41 @@ class TestController extends Controller
             'player3_ten' => '35000',
         ]);
         return $haipai_id;
+    }
+    public function seiretu ($player_hai_data) 
+    {
+        $hai = explode(',',$player_hai_data);
+        $hai_data = "";
+        foreach($hai as $val){
+            $num = substr($val, 0, 1);
+            $type = substr($val, 1, 1);
+            if($type == "p"){
+                $hai_data .= $val . ",";
+            }
+        }
+        foreach($hai as $val){
+            $num = substr($val, 0, 1);
+            $type = substr($val, 1, 1);
+            if($type == "s"){
+                $hai_data .= $val . ",";
+            }
+        }
+        foreach($hai as $val){
+            $num = substr($val, 0, 1);
+            $type = substr($val, 1, 1);
+            if($type == "z"){
+                $hai_data .= $val . ",";
+            }
+        }
+        foreach($hai as $val){
+            $num = substr($val, 0, 1);
+            $type = substr($val, 1, 1);
+            if($type == "m"){
+                $hai_data .= $val . ",";
+            }
+        }
+        $player_hai = ltrim($hai_data, ',');
+        return $player_hai;
     }
     public function gamecheck (Request $request) 
     {
