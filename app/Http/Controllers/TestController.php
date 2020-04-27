@@ -334,7 +334,8 @@ class TestController extends Controller
             }
         }
         $player_hai = ltrim($hai_data, ',');
-        return $player_hai;
+        $p_hai = substr($player_hai, 0, -1);
+        return $p_hai;
     }
     public function gamecheck (Request $request) 
     {
