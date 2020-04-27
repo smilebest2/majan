@@ -99,8 +99,6 @@ class TestController extends Controller
     }
     public function sutehai (Request $request) 
     {
-        Log::debug($request);
-
         $haipai = DB::table('haipai')->where('game_id',$request->session()->get('game_id'))->first();
         if($request->session()->get('player_no') == "player1"){
             $sutehai = $haipai->player1_sutehai . "," . $request['sutehai'];
@@ -116,7 +114,8 @@ class TestController extends Controller
                         $hai_data .= $val . ",";
                     }
                 }
-                $p_hai = substr($hai_data, 0, -1);
+                $sento_del = substr($hai_data, 1);
+                $p_hai = substr($sento_del, 0, -1);
             }else{
                 $p_hai = $haipai->player1_hai;
             }
@@ -271,5 +270,18 @@ class TestController extends Controller
             'player3_ten' => '35000',
         ]);
         return $haipai_id;
+    }
+    public function gamecheck (Request $request) 
+    {
+        $game_status = DB::table('game_status')->where('id',$request->session()->get('game_id'))->first();
+        $haipai = DB::table('haipai')->where('game_id',$request->session()->get('game_id'))->first();
+        
+        if($request['update_time'] != $haipai->update_time){
+            $res = ['result'=>'user_time','message'=>$haipai];
+        }else{
+            $res = ['result'=>'other_time','message'=>$haipai];
+        }
+        $result = json_encode($res);
+        return $result;
     }
 }

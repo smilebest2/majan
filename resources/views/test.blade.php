@@ -20,7 +20,95 @@
                     ck_flg = "tumo_ban";
                 }
                 if(ck_flg != "tumo_ban"){
-                    location.reload();
+                    var update_time = "{{$haipai->update_time}}";
+                    $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        });
+                        $.ajax({
+                            url: "{{ action('TestController@gamecheck') }}",
+                            type: 'POST',
+                            data:{'update_time':update_time},
+                            dataType:'json'
+                        })
+                        // Ajaxリクエストが成功した場合
+                        .done(function(data) {
+
+                            if (data.result == "user_time") {
+alert(data.message);
+                            }
+                            if (data.result == "other_time") {
+                                var player = "{{Session::get('player_no')}}";
+                                if(data.message.player1_sutehai != ""){
+                                    var sutehai_data = data.message.player1_sutehai;
+                                    var sutehai_arr = sutehai_data.split(',');
+                                    var sutehai_disp = "";
+                                    if(player == "player1"){
+                                        sutehai_disp = "#player_sutehai_";
+                                    }
+                                    if(player == "player2"){
+                                        sutehai_disp = "#kamitya_sutehai_";
+                                    }
+                                    if(player == "player3"){
+                                        sutehai_disp = "#toimen_sutehai_";
+                                    }
+                                    for( var i=0; i < sutehai_arr.length; i++){
+                                        var select_id = sutehai_disp + i;
+                                        var img_path = $(select_id).attr('src');
+                                        var path = img_path.slice(0,-6);
+                                        var new_path = path + sutehai_arr[i] + ".png";
+                                        $(select_id).attr('src', new_path);
+                                    }
+                                }
+                                if(data.message.player2_sutehai != ""){
+                                    var sutehai_data = data.message.player2_sutehai;
+                                    var sutehai_arr = sutehai_data.split(',');
+                                    var sutehai_disp = "";
+                                    if(player == "player1"){
+                                        sutehai_disp = "#simotya_sutehai_";
+                                    }
+                                    if(player == "player2"){
+                                        sutehai_disp = "#player_sutehai_";
+                                    }
+                                    if(player == "player3"){
+                                        sutehai_disp = "#kamitya_sutehai_";
+                                    }
+                                    for( var i=0; i < sutehai_arr.length; i++){
+                                        var select_id = sutehai_disp + i;
+                                        var img_path = $(select_id).attr('src');
+                                        var path = img_path.slice(0,-6);
+                                        var new_path = path + sutehai_arr[i] + ".png";
+                                        $(select_id).attr('src', new_path);
+                                    }
+                                }
+                                if(data.message.player3_sutehai != ""){
+                                    var sutehai_data = data.message.player3_sutehai;
+                                    var sutehai_arr = sutehai_data.split(',');
+                                    var sutehai_disp = "";
+                                    if(player == "player1"){
+                                        sutehai_disp = "#toimen_sutehai_";
+                                    }
+                                    if(player == "player2"){
+                                        sutehai_disp = "#simotya_sutehai_";
+                                    }
+                                    if(player == "player3"){
+                                        sutehai_disp = "#player_sutehai_";
+                                    }
+                                    for( var i=0; i < sutehai_arr.length; i++){
+                                        var select_id = sutehai_disp + i;
+                                        var img_path = $(select_id).attr('src');
+                                        var path = img_path.slice(0,-6);
+                                        var new_path = path + sutehai_arr[i] + ".png";
+                                        $(select_id).attr('src', new_path);
+                                    }
+                                }
+                            }
+                        })
+                        // Ajaxリクエストが失敗した場合
+                        .fail(function(data) {
+                            alert("接続失敗");
+                        });
                 }
             },5000);
             var tehais = $('[id^=tehai_]').length;
@@ -37,30 +125,32 @@
                     $(this).css('opacity', '1');
                 });
                 $(select).on('click', function() {
-                    var id = "#" + $(this).attr('id');
-                    var sutehai = $(id).attr('value');
-                    var tumohai = $('#tehai_tumo').attr('value');
-                    $.ajaxSetup({
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        }
-                    });
-                    $.ajax({
-                        url: "{{ action('TestController@sutehai') }}",
-                        type: 'POST',
-                        data:{'sutehai':sutehai,'tumohai':tumohai},
-                        dataType:'json'
-                    })
-                    // Ajaxリクエストが成功した場合
-                    .done(function(data) {
-                        if (data.result == "OK") {
-                           location.reload();
-                        }
-                    })
-                    // Ajaxリクエストが失敗した場合
-                    .fail(function(data) {
-                        alert("接続失敗");
-                    });
+                    if($('#tehai_tumo').attr('value') != "0h"){
+                        var id = "#" + $(this).attr('id');
+                        var sutehai = $(id).attr('value');
+                        var tumohai = $('#tehai_tumo').attr('value');
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        });
+                        $.ajax({
+                            url: "{{ action('TestController@sutehai') }}",
+                            type: 'POST',
+                            data:{'sutehai':sutehai,'tumohai':tumohai},
+                            dataType:'json'
+                        })
+                        // Ajaxリクエストが成功した場合
+                        .done(function(data) {
+                            if (data.result == "OK") {
+                            location.reload();
+                            }
+                        })
+                        // Ajaxリクエストが失敗した場合
+                        .fail(function(data) {
+                            alert("接続失敗");
+                        });
+                    }
                 });
             }
             $('#tehai_tumo').on('click', function() {
@@ -237,103 +327,23 @@
                 <div style="text-align:-webkit-right;">
                     <table cellspacing="0">
                     <?php
-                //対面
-                if(Session::get('player_no') =="player1"){
-                    if($haipai->player3_sutehai != ""){
-                        $sutetehai = explode(',',$haipai->player3_sutehai);
-                        array_shift($sutetehai);
-                        $count = count($sutetehai);
-                        if($count > 20){
-                            $sutehai_cnt = 40 - $count;
-                            $sutehai_sabun = 20 - $sutehai_cnt;
-
-                            $cnt = 0;
-                            echo "<tr>";
-                            if($sutehai_cnt <= 20){
-                                for($i = 1;$i <= $sutehai_cnt;$i++){
-                                    echo "<td></td>";
-                                }
-                            }
-                            $sutehai_data = $sutehai_img;
-                            foreach($sutehai_img as $val){
-                                $cnt++;
-                                if($cnt <= $sutehai_sabun){
-                                    array_shift($sutehai_data);
-                                    $img_path= asset("/img/hai/" . $val . ".png");
-                                    echo "<td><img class=\"rotate1\" src= " . $img_path . "></td>";
-                                }
-                            }
-                            echo "</tr>";
-                            echo "<tr>";
-                            $sutehai_img = array_reverse($sutetehai);
-                            foreach($sutehai_data as $val){
-                                $img_path= asset("/img/hai/" . $val . ".png");
-                                echo "<td><img class=\"rotate1\" src= " . $img_path . "></td>";
-                            }
-                            echo "</tr>";
-                        }else{
-                            echo "<tr></tr>";
-                            echo "<tr>";
-                            $sutehai_img = array_reverse($sutetehai);
-                            foreach($sutehai_img as $val){
-                                $img_path= asset("/img/hai/" . $val . ".png");
-                                echo "<td><img class=\"rotate1\" src= " . $img_path . "></td>";
-                            }
-                            echo "</tr>";
+                        //対面
+                        $img_path= asset("/img/hai/0h.png");
+                        echo "<tr>";
+                        for($i = 0;$i < 20;$i++){
+                            $cnt = 39 - $i;
+                            $id = "id=\"toimen_sutehai_" . $cnt . "\""; 
+                            echo "<td><img " . $id . "class=\"rotate1\" src= " . $img_path . "></td>";
                         }
-                    }                    
-                }
-                if(Session::get('player_no') =="player3"){
-                    if($haipai->player1_sutehai != ""){
-                        $sutetehai = explode(',',$haipai->player1_sutehai);
-                        array_shift($sutetehai);
-                        $count = count($sutetehai);
-                        $sutehai_img = array_reverse($sutetehai);
-
-                        if($count > 20){
-                            $sutehai_cnt = 40 - $count;
-                            $sutehai_sabun = 20 - $sutehai_cnt;
-
-                            $cnt = 0;
-                            echo "<tr>";
-                            if($sutehai_cnt <= 20){
-                                for($i = 1;$i <= $sutehai_cnt;$i++){
-                                    echo "<td></td>";
-                                }
-                            }
-                            $sutehai_data = $sutehai_img;
-                            foreach($sutehai_img as $val){
-                                $cnt++;
-                                if($cnt <= $sutehai_sabun){
-                                    array_shift($sutehai_data);
-                                    $img_path= asset("/img/hai/" . $val . ".png");
-                                    echo "<td><img class=\"rotate1\" src= " . $img_path . "></td>";
-                                }
-                            }
-                            echo "</tr>";
-                            echo "<tr>";
-                            $sutehai_img = array_reverse($sutetehai);
-                            foreach($sutehai_data as $val){
-                                $img_path= asset("/img/hai/" . $val . ".png");
-                                echo "<td><img class=\"rotate1\" src= " . $img_path . "></td>";
-                            }
-                            echo "</tr>";
-                        }else{
-                            echo "<tr></tr>";
-                            echo "<tr>";
-                            $sutehai_img = array_reverse($sutetehai);
-                            foreach($sutehai_img as $val){
-                                if($val != null){
-                                    $img_path= asset("/img/hai/" . $val . ".png");
-                                    echo "<td><img class=\"rotate1\" src= " . $img_path . "></td>";
-                                }
-                            }
-                            echo "</tr>";
+                        echo "</tr>";
+                        echo "<tr>";
+                        for($i = 0;$i < 20;$i++){
+                            $cnt = 19 - $i;
+                            $id = "id=\"toimen_sutehai_" . $cnt . "\""; 
+                            echo "<td><img " . $id . "class=\"rotate1\" src= " . $img_path . "></td>";
                         }
-                    }
-                }
-            ?>
-                        
+                        echo "</tr>";
+                    ?>
                     </table>
                 </div>
             </article>
@@ -343,12 +353,6 @@
                 @if(Session::get('player_no') =="player2" || Session::get('player_no') =="player3")
                     <table cellspacing="0">
                     <?php
-                        if(Session::get('player_no') =="player2"){
-                            $sutetehai = explode(',',$haipai->player1_sutehai);
-                        }
-                        if(Session::get('player_no') =="player3"){
-                            $sutetehai = explode(',',$haipai->player2_sutehai);
-                        }
                         // 捨て配テーブル
                         // 24 18 12 6  0
                         // 25 19 13 7  1
@@ -356,217 +360,13 @@
                         // 27 21 15 9  3
                         // 28 22 16 10 4
                         // 29 23 17 11 5
-                        array_shift($sutetehai);
-                        $count = count($sutetehai);
-                        $sutehai1 ="";
-                        $sutehai2 ="";
-                        $sutehai3 ="";
-                        $sutehai4 ="";
-                        $sutehai5 ="";
-                        $sutehai6 ="";
-                        if($haipai->player2_sutehai !=""){
-                            if($count < 6){
-                                $img_path = asset("/img/hai/" . $sutetehai[0] . ".png");
-                                echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                if(isset($sutetehai[1])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[1] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }else{
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }
-                                if(isset($sutetehai[2])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[2] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }else{
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }
-                                if(isset($sutetehai[3])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[3] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }else{
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }
-                                if(isset($sutetehai[4])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[4] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }else{
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }
-                                if(isset($sutetehai[5])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[5] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }else{
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }
-                            }
-                            if($count >= 6 && $count < 13){
-                                $img_path = asset("/img/hai/" . $sutetehai[0] . ".png");
-                                $img_path2 = asset("/img/hai/" . $sutetehai[6] . ".png");
-                                echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                if(isset($sutetehai[7])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[1] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[7] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[1] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }
-                                if(isset($sutetehai[8])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[2] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[8] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[2] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }
-                                if(isset($sutetehai[9])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[3] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[9] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[3] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }
-                                if(isset($sutetehai[10])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[4] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[10] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[4] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }
-                                if(isset($sutetehai[11])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[5] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[11] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[5] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }
-                            }
-                            if($count > 12 && $count < 19){
-                                $img_path = asset("/img/hai/" . $sutetehai[0] . ".png");
-                                $img_path2 = asset("/img/hai/" . $sutetehai[6] . ".png");
-                                $img_path3 = asset("/img/hai/" . $sutetehai[12] . ".png");
-                                echo "<tr><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                if(isset($sutetehai[13])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[1] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[7] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[13] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[1] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[7] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }
-                                if(isset($sutetehai[14])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[2] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[8] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[14] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[2] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[8] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }
-                                if(isset($sutetehai[15])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[3] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[9] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[15] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[3] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[9] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }
-                                if(isset($sutetehai[16])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[4] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[10] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[16] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[4] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[10] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }
-                                if(isset($sutetehai[17])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[5] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[11] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[17] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[5] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[11] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }
-                            }
-                            if($count > 18 && $count < 28){
-                                $img_path = asset("/img/hai/" . $sutetehai[0] . ".png");
-                                $img_path2 = asset("/img/hai/" . $sutetehai[6] . ".png");
-                                $img_path3 = asset("/img/hai/" . $sutetehai[12] . ".png");
-                                $img_path4 = asset("/img/hai/" . $sutetehai[18] . ".png");
-                                echo "<tr><td class=\"td2\"><img class=\"rotate\" src= " . $img_path4 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                if(isset($sutetehai[19])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[1] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[7] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[13] . ".png");
-                                    $img_path4 = asset("/img/hai/" . $sutetehai[19] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate\" src= " . $img_path4 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[1] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[7] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[13] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }
-                                if(isset($sutetehai[20])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[2] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[8] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[14] . ".png");
-                                    $img_path4 = asset("/img/hai/" . $sutetehai[20] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate\" src= " . $img_path4 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[2] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[8] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[14] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }
-                                if(isset($sutetehai[21])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[3] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[9] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[15] . ".png");
-                                    $img_path4 = asset("/img/hai/" . $sutetehai[21] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate\" src= " . $img_path4 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[3] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[9] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[15] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }
-                                if(isset($sutetehai[22])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[4] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[10] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[16] . ".png");
-                                    $img_path4 = asset("/img/hai/" . $sutetehai[22] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate\" src= " . $img_path4 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[4] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[10] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[16] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }
-                                if(isset($sutetehai[23])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[5] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[11] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[17] . ".png");
-                                    $img_path4 = asset("/img/hai/" . $sutetehai[23] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate\" src= " . $img_path4 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[5] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[11] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[17] . ".png");
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate\" src= " . $img_path . "></td></tr>";
-                                }
-                            }
+                        $img_path= asset("/img/hai/0h.png");
+                        for($i = 0;$i < 6;$i++){
+                            $id1 = "id=\"kamitya_sutehai_" . $i . "\"";
+                            $id2 = "id=\"kamitya_sutehai_" . ($i + 6) . "\"";
+                            $id3 = "id=\"kamitya_sutehai_" . ($i + 12) . "\"";
+                            $id4 = "id=\"kamitya_sutehai_" . ($i + 18) . "\"";
+                            echo "<tr><td class=\"td2\"><img " . $id4 . "class=\"rotate\" src= " . $img_path . "></td><td class=\"td2\"><img " . $id3 . "class=\"rotate\" src= " . $img_path . "></td><td class=\"td2\"><img " . $id2 . "class=\"rotate\" src= " . $img_path . "></td><td class=\"td2\"><img " . $id1 . "class=\"rotate\" src= " . $img_path . "></td></tr>";
                         }
                     ?>
                     </table>
@@ -654,12 +454,6 @@
                     @if(Session::get('player_no') =="player1" || Session::get('player_no') =="player2")
                     <table cellspacing="0">
                     <?php
-                        if(Session::get('player_no') =="player1"){
-                            $sutetehai = explode(',',$haipai->player2_sutehai);
-                        }
-                        if(Session::get('player_no') =="player2"){
-                            $sutetehai = explode(',',$haipai->player3_sutehai);
-                        }
                         // 捨て配テーブル
                         // 5 11 17 23 29
                         // 4 10 16 22 28
@@ -667,215 +461,13 @@
                         // 2  8 14 20 26
                         // 1  7 13 19 25
                         // 0  6 12 18 24
-                        array_shift($sutetehai);
-                        $count = count($sutetehai);
-                        $sutehai1 ="";
-                        $sutehai2 ="";
-                        $sutehai3 ="";
-                        $sutehai4 ="";
-                        $sutehai5 ="";
-                        $sutehai6 ="";
-                        if($haipai->player2_sutehai !=""){
-                            if($count < 6){
-                                if(isset($sutetehai[5])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[5] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }else{
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }
-                                if(isset($sutetehai[3])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[3] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }else{
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }
-                                if(isset($sutetehai[2])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[2] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }else{
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }
-                                if(isset($sutetehai[1])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[1] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }else{
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }
-                                if(isset($sutetehai[0])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[0] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }else{
-                                    echo "<tr><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }
-                            }
-                            if($count >= 6 && $count < 13){
-                               if(isset($sutetehai[11])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[5] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[11] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[5] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }
-                                if(isset($sutetehai[10])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[4] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[10] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[4] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }
-                                if(isset($sutetehai[9])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[3] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[9] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[3] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }
-                                if(isset($sutetehai[8])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[2] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[8] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[2] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }
-                                if(isset($sutetehai[7])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[1] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[7] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[1] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }
-                                $img_path = asset("/img/hai/" . $sutetehai[0] . ".png");
-                                $img_path2 = asset("/img/hai/" . $sutetehai[6] . ".png");
-                                echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                            }
-                            if($count > 12 && $count < 19){
-                                if(isset($sutetehai[17])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[5] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[11] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[17] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path3 . "></td><td class=\"td2\"></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[5] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[11] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }
-                                if(isset($sutetehai[16])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[4] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[10] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[16] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path3 . "></td><td class=\"td2\"></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[4] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[10] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }
-                                if(isset($sutetehai[15])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[3] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[9] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[15] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path3 . "></td><td class=\"td2\"></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[3] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[9] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }
-                                if(isset($sutetehai[14])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[2] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[8] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[14] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path3 . "></td><td class=\"td2\"></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[2] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[8] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }
-                                if(isset($sutetehai[13])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[1] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[7] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[13] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path3 . "></td><td class=\"td2\"></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[1] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[7] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"></td><td class=\"td2\"></td></tr>";
-                                }
-                                $img_path = asset("/img/hai/" . $sutetehai[0] . ".png");
-                                $img_path2 = asset("/img/hai/" . $sutetehai[6] . ".png");
-                                $img_path3 = asset("/img/hai/" . $sutetehai[12] . ".png");
-                                echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path3 . "></td><td class=\"td2\"></td></tr>";
-                            }
-                            if($count > 18 && $count < 28){
-                                if(isset($sutetehai[23])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[5] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[11] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[17] . ".png");
-                                    $img_path4 = asset("/img/hai/" . $sutetehai[23] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path4 . "></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[5] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[11] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[17] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path3 . "></td><td class=\"td2\"></td></tr>";
-                                }
-                                if(isset($sutetehai[22])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[4] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[10] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[16] . ".png");
-                                    $img_path4 = asset("/img/hai/" . $sutetehai[22] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path4 . "></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[4] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[10] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[16] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path3 . "></td><td class=\"td2\"></td></tr>";
-                                }
-                                if(isset($sutetehai[21])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[3] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[9] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[15] . ".png");
-                                    $img_path4 = asset("/img/hai/" . $sutetehai[21] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path4 . "></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[3] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[9] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[15] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path3 . "></td><td class=\"td2\"></td></tr>";
-                                }
-                                if(isset($sutetehai[20])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[2] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[8] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[14] . ".png");
-                                    $img_path4 = asset("/img/hai/" . $sutetehai[20] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path4 . "></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[2] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[8] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[14] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path3 . "></td><td class=\"td2\"></td></tr>";
-                                }
-                                if(isset($sutetehai[19])){
-                                    $img_path = asset("/img/hai/" . $sutetehai[1] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[7] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[13] . ".png");
-                                    $img_path4 = asset("/img/hai/" . $sutetehai[19] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path4 . "></td></tr>";
-                                }else{
-                                    $img_path = asset("/img/hai/" . $sutetehai[1] . ".png");
-                                    $img_path2 = asset("/img/hai/" . $sutetehai[7] . ".png");
-                                    $img_path3 = asset("/img/hai/" . $sutetehai[13] . ".png");
-                                    echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path3 . "></td><td class=\"td2\"></td></tr>";
-                                }
-                                $img_path = asset("/img/hai/" . $sutetehai[0] . ".png");
-                                $img_path2 = asset("/img/hai/" . $sutetehai[6] . ".png");
-                                $img_path3 = asset("/img/hai/" . $sutetehai[12] . ".png");
-                                $img_path4 = asset("/img/hai/" . $sutetehai[18] . ".png");
-                                echo "<tr><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path2 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path3 . "></td><td class=\"td2\"><img class=\"rotate2\" src= " . $img_path4 . "></td></tr>";
-                            }
+                        $img_path= asset("/img/hai/0h.png");
+                        for($i = 0;$i < 6;$i++){
+                            $id4 = "id=\"simotya_sutehai_" . (5 - $i) . "\"";
+                            $id3 = "id=\"simotya_sutehai_" . (11- $i) . "\"";
+                            $id2 = "id=\"simotya_sutehai_" . (17 -$i) . "\"";
+                            $id1 = "id=\"simotya_sutehai_" . (23 -$i) . "\"";
+                            echo "<tr><td class=\"td2\"><img " . $id4 . "class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img " . $id3 . "class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img " . $id2 . "class=\"rotate2\" src= " . $img_path . "></td><td class=\"td2\"><img " . $id1 . "class=\"rotate2\" src= " . $img_path . "></td></tr>";
                         }
                     ?>
                     </table>
@@ -887,42 +479,20 @@
                 <div>
                     <table cellspacing="0">
                     <?php
-                        if(Session::get('player_no') =="player1"){
-                            $sutetehai = explode(',',$haipai->player1_sutehai);
+                        $img_path= asset("/img/hai/0h.png");
+                        echo "<tr>";
+                        for($i = 0;$i < 20;$i++){
+                            $id = "id=\"player_sutehai_" . $i . "\""; 
+                            echo "<td><img " . $id . "src= " . $img_path . "></td>";
                         }
-                        if(Session::get('player_no') =="player2"){
-                            $sutetehai = explode(',',$haipai->player2_sutehai);
+                        echo "</tr>";
+                        echo "<tr>";
+                        for($i = 0;$i < 20;$i++){
+                            $cnt = $i + 20;
+                            $id = "id=\"player_sutehai_" . $cnt . "\""; 
+                            echo "<td><img " . $id . "src= " . $img_path . "></td>";
                         }
-                        if(Session::get('player_no') =="player3"){
-                            $sutetehai = explode(',',$haipai->player3_sutehai);
-                        }
-                        array_shift($sutetehai);
-                        $count = count($sutetehai);
-                        if($count > 20){
-                            $cnt = 0;
-                            echo "<tr>";
-                            foreach($sutetehai as $val){
-                                $cnt++;
-                                $img_path= asset("/img/hai/" . $val . ".png");
-                                echo "<td><img src= " . $img_path . "></td>";
-                                if($cnt == 20){
-                                    echo "</tr>";
-                                    echo "<tr>";
-                                }
-                            }
-                            
-                            echo "</tr>";
-                        }else{
-                            echo "<tr>";
-                            foreach($sutetehai as $val){
-                                if($val != null){
-                                    $img_path= asset("/img/hai/" . $val . ".png");
-                                    echo "<td><img src= " . $img_path . "></td>";
-                                }
-                            }
-                            echo "</tr>";
-                            echo "<tr></tr>";
-                        }
+                        echo "</tr>";
                     ?>
                     </table>
                 </div>
@@ -1007,7 +577,8 @@
                 echo "<img " . $id . "value= \"". $val . "\" src= " . $img_path . ">";
             }
             // ツモ牌
-            echo "<img style=\"display:none;\" id=\"tehai_tumo\" value= \"". $val . "\" src= " . $img_path . ">";
+            $img_path= asset("/img/hai/0h.png");
+            echo "<img style=\"display:none;\" id=\"tehai_tumo\" value= \"0h\" src= " . $img_path . ">";
             echo "<span>&nbsp;&nbsp;</span>";
         ?>
         <?php

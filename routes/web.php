@@ -24,4 +24,5 @@ Route::post('login','SigninController@logincheck');
 Route::post('readycheck','TestController@readycheck');
 Route::post('tumo','TestController@tumo');
 Route::post('sutehai','TestController@sutehai');
+Route::post('gamecheck','TestController@gamecheck');
 Route::get('start','TestController@start');
