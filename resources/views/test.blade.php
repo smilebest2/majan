@@ -11,8 +11,14 @@
         <script>
         $(document).ready(function(){
             var ck_flg = "";
+            var click_ck = "";
             var update_time = "{{$haipai->update_time}}";
             var player = "{{Session::get('player_no')}}";
+            var tumo_player = "{{$haipai->tsumo_ban}}";
+            setInterval(function(){
+                tumo_name = "#" + tumo_player + "_name";
+                $(tumo_name).fadeOut(500,function(){$(this).fadeIn(500)});
+            },1000);
             setInterval(function(){
                 if(ck_flg != "tumo_ban"){
                     $.ajaxSetup({
@@ -97,6 +103,51 @@
                                     }
                                 }
                                 $('#nokori_hai').text(data.message.nokori_hai);
+                                tumo_player = data.message.tsumo_ban;
+                                if(data.message.player1_nakihai != ""){
+                                    var nakihai_data = data.message.player1_nakihai;
+                                    var nakihai_arr = nakihai_data.split(',');
+                                    var nakihai_disp = "";
+                                    if(player == "player1"){
+                                        nakihai_disp = "#player_nakihai_";
+                                    }
+                                    if(player == "player2"){
+                                        nakihai_disp = "#kamitya_nakihai_";
+                                    }
+                                    if(player == "player3"){
+                                        nakihai_disp = "#toimen_nakihai_";
+                                    }
+                                }
+                                if(data.message.player2_nakihai != ""){
+                                    var nakihai_data = data.message.player2_nakihai;
+                                    var nakihai_arr = nakihai_data.split(',');
+                                    var nakihai_disp = "";
+                                    if(player == "player1"){
+                                        nakihai_disp = "#simotya_nakihai_";
+                                    }
+                                    if(player == "player2"){
+                                        nakihai_disp = "#player_nakihai_";
+                                    }
+                                    if(player == "player3"){
+                                        nakihai_disp = "#kamitya_nakihai_";
+                                    }
+                                }
+                                if(data.message.player3_nakihai != ""){
+                                    var nakihai_data = data.message.player3_nakihai;
+                                    var nakihai_arr = nakihai_data.split(',');
+                                    var nakihai_disp = "";
+                                    if(player == "player1"){
+                                        nakihai_disp = "#toimen_nakihai_";
+                                    }
+                                    if(player == "player2"){
+                                        nakihai_disp = "#simotya_nakihai_";
+                                    }
+                                    if(player == "player3"){
+                                        nakihai_disp = "#player_nakihai_";
+                                    }
+                                }
+
+//                                    $('#ji_naki').append(hoge);
                             }
                         })
                         // Ajaxリクエストが失敗した場合
@@ -120,7 +171,8 @@
                 });
                 $(select).on('click', function() {
                     if($('#tehai_tumo').attr('value') != "0h"){
-                        if(ck_flg == "tumo_ban"){
+                        if(ck_flg == "tumo_ban" && click_ck == ""){
+                            click_ck = "click";
                             var id = "#" + $(this).attr('id');
                             var sutehai = $(id).attr('value');
                             var tumohai = $('#tehai_tumo').attr('value');
@@ -161,17 +213,20 @@
                                         $(select_id).attr('value', hai_arr[i]);
                                     }
                                 }
+                                click_ck = "";
                             })
                             // Ajaxリクエストが失敗した場合
                             .fail(function(data) {
                                 alert("接続失敗");
+                                click_ck = "";
                             });
                         }
                     }
                 });
             }
             $('#tehai_tumo').on('click', function() {
-                if(ck_flg == "tumo_ban"){
+                if(ck_flg == "tumo_ban" && click_ck == ""){
+                    click_ck = "click";
                     var id = $(this).attr('id');
                     var sutehai = $('#tehai_tumo').attr('value');
                     var tumohai = "";
@@ -193,50 +248,58 @@
                             $('#tehai_tumo').hide();
                             ck_flg = "";
                         }
+                        click_ck = "";
                     })
                     // Ajaxリクエストが失敗した場合
                     .fail(function(data) {
                         alert("接続失敗");
+                        click_ck = "";
                     });
                 }
             });
             $('#tumo').on('click', function() {
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                });
-                $.ajax({
-                    url: "{{ action('TestController@tumo') }}",
-                    type: 'POST',
-                    dataType:'json'
-                })
-                // Ajaxリクエストが成功した場合
-                .done(function(data) {
-                    if (data.result == "OK") {
-                        var img_path = $('#tehai_tumo').attr('src');
-                        var path = img_path.slice(0,-6);
-                        var new_path = path + data.message + ".png";
-                        $('#tehai_tumo').attr('src', new_path);
-                        $('#tehai_tumo').attr('value', data.message);
-                        $('#tehai_tumo').show();
-                        $('#tehai_tumo').hover(function() {
-                            //マウスを乗せたら色が変わる
-                            $(this).css('background-color', 'blue');
-                            $(this).css('opacity', '0.6');
-                            //ここにはマウスを離したときの動作を記述
-                            }, function() {
-                                //色指定を空欄にすれば元の色に戻る
-                                $(this).css('opacity', '1');
-                            });
+                if(click_ck == ""){
+                    click_ck = "click";
+                    $.ajaxSetup({
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         }
-                        $('#tumo_span').hide();
-                        ck_flg = "tumo_ban";
-                })
-                // Ajaxリクエストが失敗した場合
-                .fail(function(data) {
-                    alert("接続失敗");
-                });
+                    });
+                    $.ajax({
+                        url: "{{ action('TestController@tumo') }}",
+                        type: 'POST',
+                        dataType:'json'
+                    })
+                    // Ajaxリクエストが成功した場合
+                    .done(function(data) {
+                        if (data.result == "OK") {
+                            var img_path = $('#tehai_tumo').attr('src');
+                            var path = img_path.slice(0,-6);
+                            var new_path = path + data.message + ".png";
+                            $('#tehai_tumo').attr('src', new_path);
+                            $('#tehai_tumo').attr('value', data.message);
+                            $('#tehai_tumo').show();
+                            $('#tehai_tumo').hover(function() {
+                                //マウスを乗せたら色が変わる
+                                $(this).css('background-color', 'blue');
+                                $(this).css('opacity', '0.6');
+                                //ここにはマウスを離したときの動作を記述
+                                }, function() {
+                                    //色指定を空欄にすれば元の色に戻る
+                                    $(this).css('opacity', '1');
+                                });
+                            }
+                            $('#tumo_span').hide();
+                            ck_flg = "tumo_ban";
+                            click_ck = "";
+                            
+                    })
+                    // Ajaxリクエストが失敗した場合
+                    .fail(function(data) {
+                        alert("接続失敗");
+                        click_ck = "";
+                    });
+                }
             });
         });
         </script>
@@ -244,11 +307,17 @@
     <body>
         <header class="header">
         {{-- 対面 --}}
-        @if(Session::get('player_no') =="player1")
-        {{$game_status->user3}} 持ち点 {{$game_status->player3_ten}}<br>
+        @if(Session::get('player_no') == "player1")
+            @if($game_status->oya_ban == "player3")
+                親
+            @endif
+            <span id="player3_name">{{$game_status->user3}}</span> 持ち点 {{$game_status->player3_ten}}<br>
         @endif
-        @if(Session::get('player_no') =="player3")
-        {{$game_status->user1}} 持ち点 {{$game_status->player1_ten}}<br>
+        @if(Session::get('player_no') == "player3")
+            @if($game_status->oya_ban == "player1")
+                親
+            @endif
+        <span id="player1_name">{{$game_status->user1}}</span> 持ち点 {{$game_status->player1_ten}}<br>
         @endif
         @if(Session::get('player_no') =="player1" || Session::get('player_no') =="player3")
             <?php
@@ -295,11 +364,17 @@
         <aside class="side">
         {{-- 上家 --}}
             @if(Session::get('player_no') =="player2")
-                {{$game_status->user1}}<br>
+                @if($game_status->oya_ban == "player1")
+                    親
+                @endif
+                <span id="player1_name">{{$game_status->user1}}</span><br>
                  持ち点 {{$game_status->player1_ten}}
             @endif
             @if(Session::get('player_no') =="player3")
-                {{$game_status->user2}}<br>
+                @if($game_status->oya_ban == "player2")
+                    親
+                @endif
+                <span id="player2_name">{{$game_status->user2}}</span><br>
                  持ち点 {{$game_status->player2_ten}}
             @endif
             <br><br>
@@ -521,7 +596,10 @@
         <aside class="side">
             @if(Session::get('player_no') =="player1" || Session::get('player_no') =="player2")
                 @if(Session::get('player_no') =="player1")
-                    {{$game_status->user2}}<br>
+                    @if($game_status->oya_ban == "player2")
+                        親
+                    @endif
+                    <span id="player2_name">{{$game_status->user2}}</span><br>
                     持ち点 {{$game_status->player2_ten}}<br><br>
                     <?php
                         //下家鳴き牌
@@ -543,7 +621,10 @@
                     ?><br>
                 @endif
                 @if(Session::get('player_no') =="player2")
-                    {{$game_status->user3}}<br>
+                    @if($game_status->oya_ban == "player3")
+                        親
+                    @endif
+                    <span id="player3_name">{{$game_status->user3}}</span><br>
                     持ち点 {{$game_status->player3_ten}}<br><br>
                     <?php
                         //下家鳴き牌
@@ -568,7 +649,16 @@
         </aside>
         </main>
         <footer class="footer">
-        {{Session::get('user')}} 
+        @if(Session::get('player_no') =="player1")
+            親
+        @endif
+        @if(Session::get('player_no') =="player2")
+            親
+        @endif
+        @if(Session::get('player_no') =="player3")
+            親
+        @endif
+        {{Session::get('user')}}
         @if(Session::get('player_no') =="player1")
             持ち点 {{$game_status->player1_ten}}
         @endif
@@ -601,6 +691,7 @@
             echo "<span>&nbsp;&nbsp;</span><img style=\"display:none;\" id=\"tehai_tumo\" value= \"0h\" src= " . $img_path . ">";
             echo "<span>&nbsp;&nbsp;</span>";
         ?>
+        <span id="ji_naki"></span>
         <?php
         //鳴き牌
             if(Session::get('player_no') =="player1"){
@@ -611,12 +702,6 @@
             }
             if(Session::get('player_no') =="player3"){
                 $tehai = explode(',',$haipai->player3_nakihai);
-            }
-            foreach($tehai as $val){
-                if($val != null){
-                    $img_path= asset("/img/hai/" . $val . ".png");
-                    echo "<img src= " . $img_path . ">";
-                }
             }
         ?>
         <br><br>

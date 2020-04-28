@@ -149,13 +149,15 @@ class TestController extends Controller
                 $p_hai = $haipai->player3_hai;
             }
         }
+        $sutehai = $request->session()->get('player_no') . "," . $request['sutehai'];
         if($request->session()->get('player_no') == "player1"){
             $result = DB::table('haipai')
             ->where('game_id', $request->session()->get('game_id'))
             ->update([
                 'player1_hai'=>$p_hai,
                 'player1_sutehai'=>$sutehai_data,
-                'tsumo_ban'=> "player2"
+                'tsumo_ban'=> "player2",
+                'sutehai'=> $sutehai
             ]);
         }
         if($request->session()->get('player_no') == "player2"){
@@ -164,7 +166,8 @@ class TestController extends Controller
             ->update([
                 'player2_hai'=>$p_hai,
                 'player2_sutehai'=>$sutehai_data,
-                'tsumo_ban'=> "player3"
+                'tsumo_ban'=> "player3",
+                'sutehai'=> $sutehai
             ]);
         }
         if($request->session()->get('player_no') == "player3"){
@@ -173,7 +176,8 @@ class TestController extends Controller
             ->update([
                 'player3_hai'=>$p_hai,
                 'player3_sutehai'=>$sutehai_data,
-                'tsumo_ban'=> "player1"
+                'tsumo_ban'=> "player1",
+                'sutehai'=> $sutehai
             ]);
         }
         
@@ -230,7 +234,7 @@ class TestController extends Controller
             $random[$key] = $paiyama[$key];
         }
         $haipai = substr($array_no, 0, -1); 
-        
+
         $yamahai="";
         //ドラ山牌
         for($i = 1;$i <= 14;$i++){
@@ -263,7 +267,11 @@ class TestController extends Controller
         $player1_hai = $this->seiretu($player1_hai_data);
         $player2_hai = $this->seiretu($player2_hai_data);
         $player3_hai = $this->seiretu($player3_hai_data);
-        
+        $nokorihai_str = "";
+        foreach ($random as $val) {
+            $nokorihai_str .= $val . ",";
+        }
+        $nokori_hai = substr($nokorihai_str, 0, -1);
         DB::table('haipai')->insert([
             'game_id' => $game_id,
             'haipai' => $haipai,
