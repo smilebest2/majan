@@ -83,7 +83,7 @@
                                         sutehai_disp = "#toimen_sutehai_";
                                     }
                                     if(player == "player2"){
-                                        sutehai_disp = "#kamitya_sutehai_";
+                                        sutehai_disp = "#simotya_sutehai_";
                                     }
                                     if(player == "player3"){
                                         sutehai_disp = "#player_sutehai_";
@@ -158,7 +158,7 @@
                                         var path = img_path.slice(0,-6);
                                         var new_path = path + hai_arr[i] + ".png";
                                         $(select_id).attr('src', new_path);
-                                        $('#tehai_').attr('value', hai_arr[i]);
+                                        $(select_id).attr('value', hai_arr[i]);
                                     }
                                 }
                             })
@@ -243,6 +243,7 @@
     </head>
     <body>
         <header class="header">
+        {{-- 対面 --}}
         @if(Session::get('player_no') =="player1")
         {{$game_status->user3}} 持ち点 {{$game_status->player3_ten}}<br>
         @endif
@@ -372,7 +373,6 @@
             {{-- 上家捨て配 --}}
             <article class="c_side">
                 <div>
-                @if(Session::get('player_no') =="player2" || Session::get('player_no') =="player3")
                     <table cellspacing="0">
                     <?php
                         // 捨て配テーブル
@@ -392,7 +392,6 @@
                         }
                     ?>
                     </table>
-                @endif
                 </div>
             </article>
             <article class="c_sicro1">
@@ -473,7 +472,6 @@
             {{-- 下家捨て配 --}}
             <article class="c_side">
                 <div>
-                    @if(Session::get('player_no') =="player1" || Session::get('player_no') =="player2")
                     <table cellspacing="0">
                     <?php
                         // 捨て配テーブル
@@ -493,7 +491,6 @@
                         }
                     ?>
                     </table>
-                @endif
                 </div>
             </article>
             {{-- プレイヤー捨て配 --}}
@@ -520,6 +517,7 @@
                 </div>
             </article>
         </article>
+        {{-- 下家 --}}
         <aside class="side">
             @if(Session::get('player_no') =="player1" || Session::get('player_no') =="player2")
                 @if(Session::get('player_no') =="player1")
