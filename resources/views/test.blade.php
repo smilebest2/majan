@@ -12,6 +12,10 @@
         $(document).ready(function(){
             var ck_flg = "";
             var click_ck = "";
+            var new_path = "";
+            var select_id = "";
+            var path = "";
+            var ponkan = "";
             var update_time = "{{$haipai->update_time}}";
             var player = "{{Session::get('player_no')}}";
             var tumo_player = "{{$haipai->tsumo_ban}}";
@@ -38,10 +42,11 @@
                                 update_time = data.message.update_time;
                                 if(data.message.tsumo_ban == player){
                                     $('#tumo_span').show();
+                                }else{
+                                    $('#tumo_span').hide();
                                 }
                                 if(data.message.player1_sutehai != ""){
-                                    var sutehai_data = data.message.player1_sutehai;
-                                    var sutehai_arr = sutehai_data.split(',');
+                                    var sutehai_arr = data.message.player1_sutehai.split(',');
                                     var sutehai_disp = "";
                                     if(player == "player1"){
                                         sutehai_disp = "#player_sutehai_";
@@ -52,17 +57,10 @@
                                     if(player == "player3"){
                                         sutehai_disp = "#toimen_sutehai_";
                                     }
-                                    for(var i=0; i < sutehai_arr.length; i++){
-                                        var select_id = sutehai_disp + i;
-                                        var img_path = $(select_id).attr('src');
-                                        var path = img_path.slice(0,-6);
-                                        var new_path = path + sutehai_arr[i] + ".png";
-                                        $(select_id).attr('src', new_path);
-                                    }
+                                    disp(sutehai_arr,sutehai_disp);
                                 }
                                 if(data.message.player2_sutehai != ""){
-                                    var sutehai_data = data.message.player2_sutehai;
-                                    var sutehai_arr = sutehai_data.split(',');
+                                    var sutehai_arr = data.message.player2_sutehai.split(',');
                                     var sutehai_disp = "";
                                     if(player == "player1"){
                                         sutehai_disp = "#simotya_sutehai_";
@@ -73,17 +71,10 @@
                                     if(player == "player3"){
                                         sutehai_disp = "#kamitya_sutehai_";
                                     }
-                                    for(var i=0; i < sutehai_arr.length; i++){
-                                        var select_id = sutehai_disp + i;
-                                        var img_path = $(select_id).attr('src');
-                                        var path = img_path.slice(0,-6);
-                                        var new_path = path + sutehai_arr[i] + ".png";
-                                        $(select_id).attr('src', new_path);
-                                    }
+                                    disp(sutehai_arr,sutehai_disp);
                                 }
                                 if(data.message.player3_sutehai != ""){
-                                    var sutehai_data = data.message.player3_sutehai;
-                                    var sutehai_arr = sutehai_data.split(',');
+                                    var sutehai_arr = data.message.player3_sutehai.split(',');
                                     var sutehai_disp = "";
                                     if(player == "player1"){
                                         sutehai_disp = "#toimen_sutehai_";
@@ -94,19 +85,21 @@
                                     if(player == "player3"){
                                         sutehai_disp = "#player_sutehai_";
                                     }
-                                    for(var i=0; i < sutehai_arr.length; i++){
-                                        var select_id = sutehai_disp + i;
-                                        var img_path = $(select_id).attr('src');
-                                        var path = img_path.slice(0,-6);
-                                        var new_path = path + sutehai_arr[i] + ".png";
-                                        $(select_id).attr('src', new_path);
-                                    }
+                                    disp(sutehai_arr,sutehai_disp);
                                 }
                                 $('#nokori_hai').text(data.message.nokori_hai);
-                                tumo_player = data.message.tsumo_ban;
+                                if(data.message.pon != ""){
+                                    $('#pon_span').show();
+                                }else{
+                                    $('#pon_span').hide();
+                                }
+                                if(data.message.tsumo_ban.slice(-5) == "_tumo"){
+                                    tumo_player = data.message.tsumo_ban.slice(0,-5);
+                                }else{
+                                    tumo_player = data.message.tsumo_ban;
+                                }
                                 if(data.message.player1_nakihai != ""){
-                                    var nakihai_data = data.message.player1_nakihai;
-                                    var nakihai_arr = nakihai_data.split(',');
+                                    var nakihai_arr = data.message.player1_nakihai.split(',');
                                     var nakihai_disp = "";
                                     if(player == "player1"){
                                         nakihai_disp = "#player_nakihai_";
@@ -119,8 +112,7 @@
                                     }
                                 }
                                 if(data.message.player2_nakihai != ""){
-                                    var nakihai_data = data.message.player2_nakihai;
-                                    var nakihai_arr = nakihai_data.split(',');
+                                    var nakihai_arr = data.message.player2_nakihai.split(',');
                                     var nakihai_disp = "";
                                     if(player == "player1"){
                                         nakihai_disp = "#simotya_nakihai_";
@@ -133,9 +125,6 @@
                                     }
                                 }
                                 if(data.message.player3_nakihai != ""){
-                                    var nakihai_data = data.message.player3_nakihai;
-                                    var nakihai_arr = nakihai_data.split(',');
-                                    var nakihai_disp = "";
                                     if(player == "player1"){
                                         nakihai_disp = "#toimen_nakihai_";
                                     }
@@ -143,7 +132,7 @@
                                         nakihai_disp = "#simotya_nakihai_";
                                     }
                                     if(player == "player3"){
-                                        nakihai_disp = "#player_nakihai_";
+                                        disp_ji_nakihai(data.message.player3_nakihai.split(','));
                                     }
                                 }
 
@@ -170,7 +159,7 @@
                     $(this).css('opacity', '1');
                 });
                 $(select).on('click', function() {
-                    if($('#tehai_tumo').attr('value') != "0h"){
+                    if($('#tehai_tumo').attr('value') != "0h" || ponkan == "ponkan"){
                         if(ck_flg == "tumo_ban" && click_ck == ""){
                             click_ck = "click";
                             var id = "#" + $(this).attr('id');
@@ -190,30 +179,50 @@
                             // Ajaxリクエストが成功した場合
                             .done(function(data) {
                                 if (data.result == "OK") {
-                                    ck_flg = "";
                                     $('#tehai_tumo').hide();
+                                    var hai_disp = "#tehai_";
                                     if(player == "player1"){
                                         var hai_data = data.message.player1_hai;
-                                        var hai_arr = hai_data.split(',');
+                                        var hai_arr = data.message.player1_hai.split(',');
                                     }
                                     if(player == "player2"){
                                         var hai_data = data.message.player2_hai;
-                                        var hai_arr = hai_data.split(',');
+                                        var hai_arr = data.message.player2_hai.split(',');
                                     }
                                     if(player == "player3"){
                                         var hai_data = data.message.player3_hai;
-                                        var hai_arr = hai_data.split(',');
+                                        var hai_arr = data.message.player3_hai.split(',');
                                     }
-                                    for(var i=0; i < hai_arr.length; i++){
-                                        var select_id = "#tehai_" + i;
-                                        var img_path = $(select_id).attr('src');
-                                        var path = img_path.slice(0,-6);
-                                        var new_path = path + hai_arr[i] + ".png";
-                                        $(select_id).attr('src', new_path);
-                                        $(select_id).attr('value', hai_arr[i]);
+                                    disp(hai_arr,hai_disp,tehai = "tehai");
+
+                                    if(data.message.player1_sutehai != ""){
+                                        var sutehai_arr = data.message.player1_sutehai.split(',');
+                                        var sutehai_disp = "";
+                                        if(player == "player1"){
+                                            sutehai_disp = "#player_sutehai_";
+                                            disp(sutehai_arr,sutehai_disp);
+                                        }
+                                    }
+                                    if(data.message.player2_sutehai != ""){
+                                        var sutehai_arr = data.message.player2_sutehai.split(',');
+                                        var sutehai_disp = "";
+                                        if(player == "player2"){
+                                            sutehai_disp = "#player_sutehai_";
+                                            disp(sutehai_arr,sutehai_disp);
+                                        }
+                                    }
+                                    if(data.message.player3_sutehai != ""){
+                                        var sutehai_arr = data.message.player3_sutehai.split(',');
+                                        var sutehai_disp = "";
+                                        if(player == "player3"){
+                                            sutehai_disp = "#player_sutehai_";
+                                            disp(sutehai_arr,sutehai_disp);
+                                        }
                                     }
                                 }
+                                ck_flg = "";
                                 click_ck = "";
+                                ponkan = "";
                             })
                             // Ajaxリクエストが失敗した場合
                             .fail(function(data) {
@@ -223,6 +232,66 @@
                         }
                     }
                 });
+            }
+            function disp(hai_arr,hai_disp,tehai = "",pon = ""){
+                for(var i=0; i < hai_arr.length; i++){
+                    select_id = hai_disp + i;
+                    path = $(select_id).attr('src').slice(0,-6);
+                    new_path = path + hai_arr[i] + ".png";
+                    $(select_id).attr('src', new_path);
+                    if(tehai != ""){
+                        $(select_id).attr('value', hai_arr[i]);
+                    }
+                }
+                if(pon != ""){
+                    $('#tehai_tumo').attr('src', new_path);
+                    $('#tehai_tumo').show();
+                    for(var cnt = i + 1; cnt < 14; cnt++){
+                        select_id = hai_disp + cnt;
+                        $(select_id).hide();
+                    }
+                }
+            }
+            function disp_ji_nakihai(nakihai_arr){
+                path = $('#tehai_0').attr('src').slice(0,-6);
+                new_path = "";
+                var naki_player = "";
+                var rotate = "0";
+                $("#ji_naki").empty();
+                for(var i=0; i < nakihai_arr.length; i++){
+                    if(nakihai_arr[i] == "player1"){
+                        naki_player = "player1";
+                        rotate = "1";
+                    }
+                    if(nakihai_arr[i] == "player2"){
+                        naki_player = "player2";
+                        rotate = "2";
+                    }
+                    if(nakihai_arr[i] != "player1" && nakihai_arr[i] != "player2"){
+                        if(naki_player == "player1"){
+                            new_path = path + nakihai_arr[i] + ".png";
+                            if(rotate == "1"){
+                                $('#ji_naki').append('<img src= ' + new_path + '>');
+                                rotate = "0";
+                            }else{
+//                                                        $('#ji_naki').append('<img class="rotate" src= ' + new_path + '>');
+                                $('#ji_naki').append('<img src= ' + new_path + '>');
+                                rotate = "1";
+                            }
+                        }
+                        if(naki_player == "player2"){
+                            new_path = path + nakihai_arr[i] + ".png";
+                            if(rotate == "2"){
+//                                                        $('#ji_naki').append('<img class="rotate2" src= ' + new_path + '>');
+                                $('#ji_naki').append('<img src= ' + new_path + '>');
+                                rotate = "0";
+                            }else{
+                                $('#ji_naki').append('<img src= ' + new_path + '>');
+                                rotate = "0";
+                            }
+                        }
+                    }
+                }
             }
             $('#tehai_tumo').on('click', function() {
                 if(ck_flg == "tumo_ban" && click_ck == ""){
@@ -259,6 +328,7 @@
             });
             $('#tumo').on('click', function() {
                 if(click_ck == ""){
+                    $('#pon_span').hide();
                     click_ck = "click";
                     $.ajaxSetup({
                         headers: {
@@ -273,9 +343,8 @@
                     // Ajaxリクエストが成功した場合
                     .done(function(data) {
                         if (data.result == "OK") {
-                            var img_path = $('#tehai_tumo').attr('src');
-                            var path = img_path.slice(0,-6);
-                            var new_path = path + data.message + ".png";
+                            path = $('#tehai_tumo').attr('src').slice(0,-6);
+                            new_path = path + data.message + ".png";
                             $('#tehai_tumo').attr('src', new_path);
                             $('#tehai_tumo').attr('value', data.message);
                             $('#tehai_tumo').show();
@@ -293,6 +362,143 @@
                             ck_flg = "tumo_ban";
                             click_ck = "";
                             
+                    })
+                    // Ajaxリクエストが失敗した場合
+                    .fail(function(data) {
+                        alert("接続失敗");
+                        click_ck = "";
+                    });
+                }
+            });
+            $('#pon').on('click', function() {
+                if(click_ck == ""){
+                    $('#tumo_span').hide();
+                    click_ck = "click";
+                    $.ajaxSetup({
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        }
+                    });
+                    $.ajax({
+                        url: "{{ action('TestController@pon') }}",
+                        type: 'POST',
+                        dataType:'json'
+                    })
+                    // Ajaxリクエストが成功した場合
+                    .done(function(data) {
+                        if (data.result == "OK") {
+                            var hai_disp = "#tehai_";
+                            if(player == "player1"){
+                                var hai_arr = data.message.player1_hai.split(',');
+                            }
+                            if(player == "player2"){
+                                var hai_arr = data.message.player2_hai.split(',');
+                            }
+                            if(player == "player3"){
+                                var hai_arr = data.message.player3_hai.split(',');
+                            }
+                            disp(hai_arr,hai_disp,tehai = "tehai",pon = "pon");
+                            if(data.message.player1_sutehai != ""){
+                                var sutehai_data = data.message.player1_sutehai;
+                                var sutehai_arr = sutehai_data.split(',');
+                                var sutehai_disp = "";
+                                if(player == "player1"){
+                                    sutehai_disp = "#player_sutehai_";
+                                }
+                                if(player == "player2"){
+                                    sutehai_disp = "#kamitya_sutehai_";
+                                }
+                                if(player == "player3"){
+                                    sutehai_disp = "#toimen_sutehai_";
+                                }
+                                disp(sutehai_arr,sutehai_disp);
+                            }
+                            if(data.message.player2_sutehai != ""){
+                                var sutehai_data = data.message.player2_sutehai;
+                                var sutehai_arr = sutehai_data.split(',');
+                                var sutehai_disp = "";
+                                if(player == "player1"){
+                                    sutehai_disp = "#simotya_sutehai_";
+                                }
+                                if(player == "player2"){
+                                    sutehai_disp = "#player_sutehai_";
+                                }
+                                if(player == "player3"){
+                                    sutehai_disp = "#kamitya_sutehai_";
+                                }
+                                disp(sutehai_arr,sutehai_disp);
+                            }
+                            if(data.message.player3_sutehai != ""){
+                                var sutehai_data = data.message.player3_sutehai;
+                                var sutehai_arr = sutehai_data.split(',');
+                                var sutehai_disp = "";
+                                if(player == "player1"){
+                                    sutehai_disp = "#toimen_sutehai_";
+                                }
+                                if(player == "player2"){
+                                    sutehai_disp = "#simotya_sutehai_";
+                                }
+                                if(player == "player3"){
+                                    sutehai_disp = "#player_sutehai_";
+                                }
+                                disp(sutehai_arr,sutehai_disp);
+                            }
+                            $('#nokori_hai').text(data.message.nokori_hai);
+                            if(data.message.pon != ""){
+                                $('#pon_span').show();
+                            }else{
+                                $('#pon_span').hide();
+                            }
+                            if(data.message.tsumo_ban.slice(-5) == "_tumo"){
+                                tumo_player = data.message.tsumo_ban.slice(0,-5);
+                            }else{
+                                tumo_player = data.message.tsumo_ban;
+                            }
+                            if(data.message.player1_nakihai != ""){
+                                var nakihai_data = data.message.player1_nakihai;
+                                var nakihai_arr = nakihai_data.split(',');
+                                var nakihai_disp = "";
+                                if(player == "player1"){
+                                    nakihai_disp = "#player_nakihai_";
+                                }
+                                if(player == "player2"){
+                                    nakihai_disp = "#kamitya_nakihai_";
+                                }
+                                if(player == "player3"){
+                                    nakihai_disp = "#toimen_nakihai_";
+                                }
+                            }
+                            if(data.message.player2_nakihai != ""){
+                                var nakihai_data = data.message.player2_nakihai;
+                                var nakihai_arr = nakihai_data.split(',');
+                                var nakihai_disp = "";
+                                if(player == "player1"){
+                                    nakihai_disp = "#simotya_nakihai_";
+                                }
+                                if(player == "player2"){
+                                    nakihai_disp = "#player_nakihai_";
+                                }
+                                if(player == "player3"){
+                                    nakihai_disp = "#kamitya_nakihai_";
+                                }
+                            }
+                            if(data.message.player3_nakihai != ""){
+                                var nakihai_arr = nakihai_data.split(',');
+                                var nakihai_disp = "";
+                                if(player == "player1"){
+                                    nakihai_disp = "#toimen_nakihai_";
+                                }
+                                if(player == "player2"){
+                                    nakihai_disp = "#simotya_nakihai_";
+                                }
+                                if(player == "player3"){
+                                    disp_ji_nakihai(data.message.player3_nakihai.split(','));
+                                }
+                            }
+                            ck_flg = "tumo_ban";
+                            ponkan = "ponkan";
+                            $('#pon_span').hide();
+                        }
                     })
                     // Ajaxリクエストが失敗した場合
                     .fail(function(data) {
@@ -649,13 +855,13 @@
         </aside>
         </main>
         <footer class="footer">
-        @if(Session::get('player_no') =="player1")
+        @if(Session::get('player_no') =="player1" && $game_status->oya_ban == "player1")
             親
         @endif
-        @if(Session::get('player_no') =="player2")
+        @if(Session::get('player_no') =="player2" && $game_status->oya_ban == "player2")
             親
         @endif
-        @if(Session::get('player_no') =="player3")
+        @if(Session::get('player_no') =="player3" && $game_status->oya_ban == "player3")
             親
         @endif
         {{Session::get('user')}}
@@ -707,10 +913,10 @@
         <br><br>
 
         <span id="tumo_span" style="display:none;"><button id="tumo" type="button">ツモ</button></span>
-        <span><button id="lon" type="button">ロン</button></span>
-        <span><button id="pon" type="button">ポン</button></span>
-        <span><button id="kan" type="button">カン</button></span>
-        <span><button id="haitumo" type="button">牌ツモ</button></span>
+        <span id="lon_span" style="display:none;"><button id="lon" type="button">ロン</button></span>
+        <span id="pon_span" style="display:none;"><button id="pon" type="button">ポン</button></span>
+        <span id="kan_span" style="display:none;"><button id="kan" type="button">カン</button></span>
+        <span id="tumoagari_span" style="display:none;"><button id="tumoagari"" type="button">ツモ上がり</button></span>
         </footer>
     </body>
 </html>
