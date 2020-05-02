@@ -108,36 +108,31 @@ class TestController extends Controller
     {
         $haipai = DB::table('haipai')->where('game_id',$request->session()->get('game_id'))->first();
         if($request->session()->get('player_no') == "player1"){
-            if($haipai->player1_sutehai !=""){
-                $sutehai_data = $haipai->player1_sutehai . "," . $request['sutehai'];
-            }else{
-                $sutehai_data = $request['sutehai'];
-            }
+            $player_sutehai = $haipai->player1_sutehai;
             $player_hai = explode(',',$haipai->player1_hai);
         }
         if($request->session()->get('player_no') == "player2"){
-            if($haipai->player2_sutehai !=""){
-                $sutehai_data = $haipai->player2_sutehai . "," . $request['sutehai'];
-            }else{
-                $sutehai_data = $request['sutehai'];
-            }
+            $player_sutehai = $haipai->player2_sutehai;
             $player_hai = explode(',',$haipai->player2_hai);
         }
         if($request->session()->get('player_no') == "player3"){
-            if($haipai->player3_sutehai !=""){
-                $sutehai_data = $haipai->player3_sutehai . "," . $request['sutehai'];
-            }else{
-                $sutehai_data = $request['sutehai'];
-            }
+            $player_sutehai = $haipai->player3_sutehai;
             $player_hai = explode(',',$haipai->player3_hai);
         }
-        if($request['tumohai'] != ""){
+        if($player_sutehai !=""){
+            $sutehai_data = $player_sutehai . "," . $request['sutehai'];
+        }else{
+            $sutehai_data = $request['sutehai'];
+        }
+        if($request['tumohai'] != "" || $request['ponkan'] == "ponkan"){
             $dupe = "";
             $hai_data = "";
             foreach($player_hai as $val){
                 if($val == $request['sutehai'] && $dupe == ""){
                     $dupe = "dupe";
-                    $hai_data .= $request['tumohai'] . ",";
+                    if($request['ponkan'] != "ponkan"){
+                        $hai_data .= $request['tumohai'] . ",";
+                    }
                 }else{
                     $hai_data .= $val . ",";
                 }
@@ -156,6 +151,7 @@ class TestController extends Controller
                 $p_hai = $haipai->player3_hai;
             }
         }
+
         $sutehai = $request->session()->get('player_no') . "," . $request['sutehai'];
         if($request->session()->get('player_no') == "player1"){
             $result = DB::table('haipai')
@@ -377,13 +373,20 @@ class TestController extends Controller
                 $ponkan = $this->ponkancheck($haipai->player3_hai,$new_sutehai);
             }
         }
+        $p1_hai = explode(',',$haipai->player1_hai);
+        $p2_hai = explode(',',$haipai->player2_hai);
+        $p3_hai = explode(',',$haipai->player3_hai);
+
         $nokori = explode(',',$haipai->nokori_hai);
+        $haipai_data['player1_hai'] = count($p1_hai);
         $haipai_data['player1_sutehai'] = $haipai->player1_sutehai;
         $haipai_data['player1_nakihai'] = $haipai->player1_nakihai;
         $haipai_data['player1_ponkan'] = $haipai->player1_ponkan;
+        $haipai_data['player2_hai'] = count($p2_hai);
         $haipai_data['player2_sutehai'] = $haipai->player2_sutehai;
         $haipai_data['player2_nakihai'] = $haipai->player2_nakihai;
         $haipai_data['player2_ponkan'] = $haipai->player2_ponkan;
+        $haipai_data['player3_hai'] = count($p3_hai);
         $haipai_data['player3_sutehai'] = $haipai->player3_sutehai;
         $haipai_data['player3_nakihai'] = $haipai->player3_nakihai;
         $haipai_data['player3_ponkan'] = $haipai->player3_ponkan;
@@ -460,7 +463,7 @@ class TestController extends Controller
         if($nakihai_data == ""){
             $nakihai = $sutehai_player . "," . $new_sutehai . "," . $new_sutehai . "," . $new_sutehai;
         }else{
-            $nakihai = $nakihai_data . $sutehai_player . "," . $new_sutehai . "," . $new_sutehai . "," . $new_sutehai;
+            $nakihai = $nakihai_data . "," . $sutehai_player . "," . $new_sutehai . "," . $new_sutehai . "," . $new_sutehai;
         }
 
         $hai = explode(',',$haipai_data);
@@ -471,8 +474,11 @@ class TestController extends Controller
                 $dupe_cnt++;
             }else{
                 $hai_data .= $val . ",";
+                $dupe_cnt = 0;
             }
         }
+        Log::debug($hai);
+        Log::debug($hai_data);
         $hai = substr($hai_data, 0, -1);
         $player_sutehai = $sutehai_player . '_sutehai';
         if(strpos($haipai->$player_sutehai,',') === false){

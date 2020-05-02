@@ -16,6 +16,7 @@
             var select_id = "";
             var path = "";
             var ponkan = "";
+            var nakihai_disp = "";
             var update_time = "{{$haipai->update_time}}";
             var player = "{{Session::get('player_no')}}";
             var tumo_player = "{{$haipai->tsumo_ban}}";
@@ -24,7 +25,7 @@
                 $(tumo_name).fadeOut(500,function(){$(this).fadeIn(500)});
             },1000);
             setInterval(function(){
-                if(ck_flg != "tumo_ban"){
+                if(ck_flg != "tumo_ban" && ponkan == ""){
                     $.ajaxSetup({
                             headers: {
                                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -99,39 +100,35 @@
                                     tumo_player = data.message.tsumo_ban;
                                 }
                                 if(data.message.player1_nakihai != ""){
-                                    var nakihai_arr = data.message.player1_nakihai.split(',');
-                                    var nakihai_disp = "";
-                                    if(player == "player1"){
-                                        nakihai_disp = "#player_nakihai_";
+                                    if(player == "player1" && data.message.player1_nakihai.length != 0){
+                                        disp_ji_nakihai(data.message.player1_nakihai.split(','));
                                     }
                                     if(player == "player2"){
                                         nakihai_disp = "#kamitya_nakihai_";
                                     }
-                                    if(player == "player3"){
-                                        nakihai_disp = "#toimen_nakihai_";
+                                    if(player == "player3" && data.message.player1_nakihai.length != 0){
+                                        disp_toimen_nakihai(data.message.player1_nakihai.split(','),data.message.player1_hai);
                                     }
                                 }
                                 if(data.message.player2_nakihai != ""){
-                                    var nakihai_arr = data.message.player2_nakihai.split(',');
-                                    var nakihai_disp = "";
                                     if(player == "player1"){
                                         nakihai_disp = "#simotya_nakihai_";
                                     }
-                                    if(player == "player2"){
-                                        nakihai_disp = "#player_nakihai_";
+                                    if(player == "player2" && data.message.player2_nakihai.length != 0){
+                                        disp_ji_nakihai(data.message.player2_nakihai.split(','));
                                     }
                                     if(player == "player3"){
                                         nakihai_disp = "#kamitya_nakihai_";
                                     }
                                 }
                                 if(data.message.player3_nakihai != ""){
-                                    if(player == "player1"){
-                                        nakihai_disp = "#toimen_nakihai_";
+                                    if(player == "player1" && data.message.player3_nakihai.length != 0){
+                                        disp_toimen_nakihai(data.message.player3_nakihai.split(','),data.message.player3_hai);
                                     }
                                     if(player == "player2"){
                                         nakihai_disp = "#simotya_nakihai_";
                                     }
-                                    if(player == "player3"){
+                                    if(player == "player3" && data.message.player3_nakihai.length != 0){
                                         disp_ji_nakihai(data.message.player3_nakihai.split(','));
                                     }
                                 }
@@ -173,52 +170,14 @@
                             $.ajax({
                                 url: "{{ action('TestController@sutehai') }}",
                                 type: 'POST',
-                                data:{'sutehai':sutehai,'tumohai':tumohai},
+                                data:{'sutehai':sutehai,'tumohai':tumohai,'ponkan':ponkan},
                                 dataType:'json'
                             })
                             // Ajaxリクエストが成功した場合
                             .done(function(data) {
                                 if (data.result == "OK") {
                                     $('#tehai_tumo').hide();
-                                    var hai_disp = "#tehai_";
-                                    if(player == "player1"){
-                                        var hai_data = data.message.player1_hai;
-                                        var hai_arr = data.message.player1_hai.split(',');
-                                    }
-                                    if(player == "player2"){
-                                        var hai_data = data.message.player2_hai;
-                                        var hai_arr = data.message.player2_hai.split(',');
-                                    }
-                                    if(player == "player3"){
-                                        var hai_data = data.message.player3_hai;
-                                        var hai_arr = data.message.player3_hai.split(',');
-                                    }
-                                    disp(hai_arr,hai_disp,tehai = "tehai");
-
-                                    if(data.message.player1_sutehai != ""){
-                                        var sutehai_arr = data.message.player1_sutehai.split(',');
-                                        var sutehai_disp = "";
-                                        if(player == "player1"){
-                                            sutehai_disp = "#player_sutehai_";
-                                            disp(sutehai_arr,sutehai_disp);
-                                        }
-                                    }
-                                    if(data.message.player2_sutehai != ""){
-                                        var sutehai_arr = data.message.player2_sutehai.split(',');
-                                        var sutehai_disp = "";
-                                        if(player == "player2"){
-                                            sutehai_disp = "#player_sutehai_";
-                                            disp(sutehai_arr,sutehai_disp);
-                                        }
-                                    }
-                                    if(data.message.player3_sutehai != ""){
-                                        var sutehai_arr = data.message.player3_sutehai.split(',');
-                                        var sutehai_disp = "";
-                                        if(player == "player3"){
-                                            sutehai_disp = "#player_sutehai_";
-                                            disp(sutehai_arr,sutehai_disp);
-                                        }
-                                    }
+                                    disp_tehai_sutehai(data);
                                 }
                                 ck_flg = "";
                                 click_ck = "";
@@ -233,7 +192,60 @@
                     }
                 });
             }
+            function disp_tehai_sutehai(data){
+                var hai_disp = "#tehai_";
+                if(player == "player1"){
+                    var hai_data = data.message.player1_hai;
+                    var hai_arr = data.message.player1_hai.split(',');
+                }
+                if(player == "player2"){
+                    var hai_data = data.message.player2_hai;
+                    var hai_arr = data.message.player2_hai.split(',');
+                }
+                if(player == "player3"){
+                    var hai_data = data.message.player3_hai;
+                    var hai_arr = data.message.player3_hai.split(',');
+                }
+                disp(hai_arr,hai_disp,tehai = "tehai");
+
+                if(data.message.player1_sutehai != ""){
+                    var sutehai_arr = data.message.player1_sutehai.split(',');
+                    var sutehai_disp = "";
+                    if(player == "player1"){
+                        sutehai_disp = "#player_sutehai_";
+                        disp(sutehai_arr,sutehai_disp);
+                    }
+                }
+                if(data.message.player2_sutehai != ""){
+                    var sutehai_arr = data.message.player2_sutehai.split(',');
+                    var sutehai_disp = "";
+                    if(player == "player2"){
+                        sutehai_disp = "#player_sutehai_";
+                        disp(sutehai_arr,sutehai_disp);
+                    }
+                }
+                if(data.message.player3_sutehai != ""){
+                    var sutehai_arr = data.message.player3_sutehai.split(',');
+                    var sutehai_disp = "";
+                    if(player == "player3"){
+                        sutehai_disp = "#player_sutehai_";
+                        disp(sutehai_arr,sutehai_disp);
+                    }
+                }
+            }
             function disp(hai_arr,hai_disp,tehai = "",pon = ""){
+                if(hai_disp == "#simotya_sutehai_" || hai_disp =="#kamitya_sutehai_"){
+                    var max = 24;
+                }
+                if(hai_disp == "#toimen_sutehai_" || hai_disp =="#player_sutehai_"){
+                    var max = 40;
+                }
+                for(var cnt = 0; cnt < max; cnt++){
+                    select_id = hai_disp + cnt;
+                    path = $(select_id).attr('src').slice(0,-6);
+                    new_path = path + "0h.png";
+                        $(select_id).attr('src', new_path);
+                }
                 for(var i=0; i < hai_arr.length; i++){
                     select_id = hai_disp + i;
                     path = $(select_id).attr('src').slice(0,-6);
@@ -244,9 +256,12 @@
                     }
                 }
                 if(pon != ""){
+                    i = i- 1;
+                    $(select_id).hide();
                     $('#tehai_tumo').attr('src', new_path);
+                    $('#tehai_tumo').attr('value', hai_arr[i]);
                     $('#tehai_tumo').show();
-                    for(var cnt = i + 1; cnt < 14; cnt++){
+                    for(var cnt = i; cnt < 13; cnt++){
                         select_id = hai_disp + cnt;
                         $(select_id).hide();
                     }
@@ -267,7 +282,11 @@
                         naki_player = "player2";
                         rotate = "2";
                     }
-                    if(nakihai_arr[i] != "player1" && nakihai_arr[i] != "player2"){
+                    if(nakihai_arr[i] == "player3"){
+                        naki_player = "player3";
+                        rotate = "1";
+                    }
+                    if(nakihai_arr[i] != "player1" && nakihai_arr[i] != "player2" && nakihai_arr[i] != "player3"){
                         if(naki_player == "player1"){
                             new_path = path + nakihai_arr[i] + ".png";
                             if(rotate == "1"){
@@ -290,7 +309,71 @@
                                 rotate = "0";
                             }
                         }
+                        if(naki_player == "player3"){
+                            new_path = path + nakihai_arr[i] + ".png";
+                                $('#ji_naki').append('<img src= ' + new_path + '>');
+                        }
                     }
+                }
+            }
+            function disp_toimen_nakihai(nakihai_arr,hai_count){
+                path = $('#tehai_0').attr('src').slice(0,-6);
+                new_path = "";
+                var naki_player = "";
+                var rotate = "0";
+                $("#toimen_naki").empty();
+                for(var i = 0; i < nakihai_arr.length; i++){
+                    if(nakihai_arr[i] == "player1"){
+                        naki_player = "player1";
+                        rotate = "1";
+                    }
+                    if(nakihai_arr[i] == "player2"){
+                        naki_player = "player2";
+                        rotate = "2";
+                    }
+                    if(nakihai_arr[i] == "player3"){
+                        naki_player = "player3";
+                        rotate = "3";
+                    }
+                    if(nakihai_arr[i] != "player1" && nakihai_arr[i] != "player2" && nakihai_arr[i] != "player3"){
+                        if(naki_player == "player1"){
+                            new_path = path + nakihai_arr[i] + ".png";
+                            if(rotate == "1"){
+                                $('#toimen_naki').append('<img class="rotate1" src= ' + new_path + '>');
+                                rotate = "0";
+                            }else{
+//                                                        $('#ji_naki').append('<img class="rotate" src= ' + new_path + '>');
+                                $('#toimen_naki').append('<img  class="rotate1" src= ' + new_path + '>');
+                                rotate = "1";
+                            }
+                        }
+                        if(naki_player == "player2"){
+                            new_path = path + nakihai_arr[i] + ".png";
+                            if(rotate == "2"){
+//                                                        $('#ji_naki').append('<img class="rotate2" src= ' + new_path + '>');
+                                $('#toimen_naki').append('<img class="rotate1" src= ' + new_path + '>');
+                                rotate = "0";
+                            }else{
+                                $('#toimen_naki').append('<img class="rotate1" src= ' + new_path + '>');
+                                rotate = "0";
+                            }
+                        }
+                        if(naki_player == "player3"){
+                            new_path = path + nakihai_arr[i] + ".png";
+                            if(rotate == "3"){
+                                $('#toimen_naki').append('<img class="rotate1" src= ' + new_path + '>');
+                                rotate = "0";
+                            }else{
+                                $('#toimen_naki').append('<img class="rotate1" src= ' + new_path + '>');
+                                rotate = "0";
+                            }
+                        }
+                    }
+                }
+                var hai = 13 - hai_count;
+                for(var i=0; i < hai; i++){
+                    select_id = "#toimen_tehai_" + String(i + hai_count);
+                    $(select_id).hide();
                 }
             }
             $('#tehai_tumo').on('click', function() {
@@ -307,7 +390,7 @@
                     $.ajax({
                         url: "{{ action('TestController@sutehai') }}",
                         type: 'POST',
-                        data:{'sutehai':sutehai,'tumohai':tumohai},
+                        data:{'sutehai':sutehai,'tumohai':tumohai,'ponkan':ponkan},
                         dataType:'json'
                     })
                     // Ajaxリクエストが成功した場合
@@ -315,9 +398,11 @@
                         if (data.result == "OK") {
                             $('#tumo_span').hide();
                             $('#tehai_tumo').hide();
+                            disp_tehai_sutehai(data);
                             ck_flg = "";
                         }
                         click_ck = "";
+                        ponkan = "";
                     })
                     // Ajaxリクエストが失敗した場合
                     .fail(function(data) {
@@ -455,11 +540,8 @@
                                 tumo_player = data.message.tsumo_ban;
                             }
                             if(data.message.player1_nakihai != ""){
-                                var nakihai_data = data.message.player1_nakihai;
-                                var nakihai_arr = nakihai_data.split(',');
-                                var nakihai_disp = "";
                                 if(player == "player1"){
-                                    nakihai_disp = "#player_nakihai_";
+                                    disp_ji_nakihai(data.message.player1_nakihai.split(','));
                                 }
                                 if(player == "player2"){
                                     nakihai_disp = "#kamitya_nakihai_";
@@ -469,22 +551,17 @@
                                 }
                             }
                             if(data.message.player2_nakihai != ""){
-                                var nakihai_data = data.message.player2_nakihai;
-                                var nakihai_arr = nakihai_data.split(',');
-                                var nakihai_disp = "";
                                 if(player == "player1"){
                                     nakihai_disp = "#simotya_nakihai_";
                                 }
                                 if(player == "player2"){
-                                    nakihai_disp = "#player_nakihai_";
+                                    disp_ji_nakihai(data.message.player2_nakihai.split(','));
                                 }
                                 if(player == "player3"){
                                     nakihai_disp = "#kamitya_nakihai_";
                                 }
                             }
                             if(data.message.player3_nakihai != ""){
-                                var nakihai_arr = nakihai_data.split(',');
-                                var nakihai_disp = "";
                                 if(player == "player1"){
                                     nakihai_disp = "#toimen_nakihai_";
                                 }
@@ -497,7 +574,9 @@
                             }
                             ck_flg = "tumo_ban";
                             ponkan = "ponkan";
+                            click_ck = "";
                             $('#pon_span').hide();
+                            $('#tumo_span').hide();
                         }
                     })
                     // Ajaxリクエストが失敗した場合
@@ -526,41 +605,23 @@
         <span id="player1_name">{{$game_status->user1}}</span> 持ち点 {{$game_status->player1_ten}}<br>
         @endif
         @if(Session::get('player_no') =="player1" || Session::get('player_no') =="player3")
-            <?php
-                //対面鳴き牌
-                if(Session::get('player_no') =="player1"){
-                    $nakihai = explode(',',$haipai->player3_nakihai);
-                    foreach($nakihai as $val){
-                        if($val != null){
-                            $img_path= asset("/img/hai/" . $val . ".png");
-                            echo "<img class=\"rotate1\"src= " . $img_path . ">";
-                        }
-                    }
-                }
-                if(Session::get('player_no') =="player3"){
-                    $nakihai = explode(',',$haipai->player1_nakihai);
-                    foreach($nakihai as $val){
-                        if($val != null){
-                            $img_path= asset("/img/hai/" . $val . ".png");
-                            echo "<img class=\"rotate1\"src= " . $img_path . ">";
-                        }
-                    }
-                }
-            ?>
+            <span id="toimen_naki"></span>
+            
             <?php
                 //対面手牌
                 if(Session::get('player_no') =="player1"){
                     $tehai = explode(',',$haipai->player3_hai);
-                    foreach($tehai as $val){
-                        $img_path= asset("/img/hai/yoko.png");
-                        echo "<img class=\"rotate1\" src= " . $img_path . ">";
-                    }
                 }
                 if(Session::get('player_no') =="player3"){
                     $tehai = explode(',',$haipai->player1_hai);
+                }
+                if(Session::get('player_no') !="player2"){
+                    $cnt = 0;
                     foreach($tehai as $val){
+                        $id = "id=\"toimen_tehai_" . $cnt . "\""; 
                         $img_path= asset("/img/hai/yoko.png");
-                        echo "<img class=\"rotate1\" src= " . $img_path . ">";
+                        echo "<img " . $id . "class=\"rotate1\" src= " . $img_path . ">";
+                        $cnt++;
                     }
                 }
             ?><br>
@@ -602,6 +663,7 @@
                         }
                     }
                 ?>
+                <span id="kamitya_naki"></span>
                 <?php
                     //上家鳴き牌
                     if(Session::get('player_no') =="player2"){
@@ -898,18 +960,6 @@
             echo "<span>&nbsp;&nbsp;</span>";
         ?>
         <span id="ji_naki"></span>
-        <?php
-        //鳴き牌
-            if(Session::get('player_no') =="player1"){
-                $tehai = explode(',',$haipai->player1_nakihai);
-            }
-            if(Session::get('player_no') =="player2"){
-                $tehai = explode(',',$haipai->player2_nakihai);
-            }
-            if(Session::get('player_no') =="player3"){
-                $tehai = explode(',',$haipai->player3_nakihai);
-            }
-        ?>
         <br><br>
 
         <span id="tumo_span" style="display:none;"><button id="tumo" type="button">ツモ</button></span>
