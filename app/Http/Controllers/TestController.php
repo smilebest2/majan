@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 class TestController extends Controller
 {
@@ -87,6 +88,32 @@ class TestController extends Controller
                 'nokori_hai'=> $nokori_data,
                 'tsumo_ban'=> $request->session()->get('player_no') . "_tumo"
             ]);
+            if($request->session()->get('player_no') == "player1"){
+                $player_hai = $haipai->player1_hai;
+                $player_nakihai = $haipai->player1_nakihai;
+            }
+            if($request->session()->get('player_no') == "player2"){
+                $player_hai = $haipai->player2_hai;
+                $player_nakihai = $haipai->player2_nakihai;
+            }
+            if($request->session()->get('player_no') == "player3"){
+                $player_hai = $haipai->player3_hai;
+                $player_nakihai = $haipai->player2_nakihai;
+            }
+            $p_hai = $player_hai . "," . $tumohai;
+            $tempai = "";
+// todoリーチボタン制御は保留
+/*
+            if($player_nakihai == ""){
+                $tempai = $this->titoicheck($p_hai);
+                if($tempai == ""){
+                    $tempai = $this->kokusicheck($p_hai);
+                }
+                if($tempai == ""){
+                    $tempai = $this->tenpaicheck($p_hai);
+                }
+            }
+*/
         }else{
             $user_no = "user" . substr($tumo_player, -1);
             $message = $game_status->$user_no . "が鳴きました";
@@ -94,8 +121,9 @@ class TestController extends Controller
             $result = json_encode($res);
             return $result;
         }
+        
         if($game_status->status == 1){
-            $res = ['result'=>'OK','message'=>$tumohai];
+            $res = ['result'=>'OK','message'=>$tumohai,'tenpai'=>$tempai];
             $result = json_encode($res);
             return $result;
         }else{
@@ -160,7 +188,8 @@ class TestController extends Controller
                 'player1_hai'=>$p_hai,
                 'player1_sutehai'=>$sutehai_data,
                 'tsumo_ban'=> "player2",
-                'sutehai'=> $sutehai
+                'sutehai'=> $sutehai,
+                'update_time' => Carbon::now()
             ]);
         }
         if($request->session()->get('player_no') == "player2"){
@@ -170,7 +199,8 @@ class TestController extends Controller
                 'player2_hai'=>$p_hai,
                 'player2_sutehai'=>$sutehai_data,
                 'tsumo_ban'=> "player3",
-                'sutehai'=> $sutehai
+                'sutehai'=> $sutehai,
+                'update_time' => Carbon::now()
             ]);
         }
         if($request->session()->get('player_no') == "player3"){
@@ -180,7 +210,8 @@ class TestController extends Controller
                 'player3_hai'=>$p_hai,
                 'player3_sutehai'=>$sutehai_data,
                 'tsumo_ban'=> "player1",
-                'sutehai'=> $sutehai
+                'sutehai'=> $sutehai,
+                'update_time' => Carbon::now()
             ]);
         }
         
@@ -225,7 +256,7 @@ class TestController extends Controller
 
         return view('test',compact('game_status','haipai'));
     }
-    private function haipai ($game_id){
+    private function haipai($game_id){
         $paiyama = config('const.paiYama');
 
         $keys = array_keys($paiyama);
@@ -292,7 +323,8 @@ class TestController extends Controller
             'player3_ponkan' => "",
             'dorayama_hai' => $dora_yama,
             'nokori_hai' => $nokori_hai,
-            'tsumo_ban' =>"player1"
+            'tsumo_ban' => "player1",
+            'update_time' => now()
         ]);
         $haipai_id = DB::getPdo()->lastInsertId();
         DB::table('game_status')->where('id',$game_id)->update([
@@ -304,7 +336,7 @@ class TestController extends Controller
         ]);
         return $haipai_id;
     }
-    public function seiretu ($player_hai_data) 
+    public function seiretu($player_hai_data) 
     {
         $hai = explode(',',$player_hai_data);
         $hai_data = "";
@@ -341,7 +373,7 @@ class TestController extends Controller
         $p_hai = substr($player_hai, 0, -1);
         return $p_hai;
     }
-    public function gamecheck (Request $request) 
+    public function gamecheck(Request $request) 
     {
         $game_status = DB::table('game_status')->where('id',$request->session()->get('game_id'))->first();
         $haipai = DB::table('haipai')->where('game_id',$request->session()->get('game_id'))->first();
@@ -376,7 +408,12 @@ class TestController extends Controller
         $p1_hai = explode(',',$haipai->player1_hai);
         $p2_hai = explode(',',$haipai->player2_hai);
         $p3_hai = explode(',',$haipai->player3_hai);
-
+        $diff = strtotime(Carbon::now()) - strtotime($haipai->update_time);
+        if($diff > 2){
+            $tsumo_ban = $haipai->tsumo_ban;
+        }else{
+            $tsumo_ban = "";
+        }
         $nokori = explode(',',$haipai->nokori_hai);
         $haipai_data['player1_hai'] = count($p1_hai);
         $haipai_data['player1_sutehai'] = $haipai->player1_sutehai;
@@ -391,7 +428,7 @@ class TestController extends Controller
         $haipai_data['player3_nakihai'] = $haipai->player3_nakihai;
         $haipai_data['player3_ponkan'] = $haipai->player3_ponkan;
         $haipai_data['nokori_hai'] = count($nokori);
-        $haipai_data['tsumo_ban'] = $haipai->tsumo_ban;
+        $haipai_data['tsumo_ban'] = $tsumo_ban;
         $haipai_data['pon'] = $ponkan['pon'];
         $haipai_data['kan'] = $ponkan['kan'];
         
@@ -403,7 +440,7 @@ class TestController extends Controller
         $result = json_encode($res);
         return $result;
     }
-    public function ponkancheck ($player_hai_data,$new_sutehai) 
+    public function ponkancheck($player_hai_data,$new_sutehai) 
     {
         $hai = explode(',',$player_hai_data);
         $dupe_arr = array();
@@ -444,14 +481,32 @@ class TestController extends Controller
         if($request->session()->get('player_no') == "player1"){
             $haipai_data = $haipai->player1_hai;
             $nakihai_data = $haipai->player1_nakihai;
+            if(substr($haipai->sutehai, 0, 7) == "player2"){
+                $pon_hainomuki = "sp";
+            }
+            if(substr($haipai->sutehai, 0, 7) == "player3"){
+                $pon_hainomuki = "tp";
+            }
         }
         if($request->session()->get('player_no') == "player2"){
             $haipai_data = $haipai->player2_hai;
             $nakihai_data = $haipai->player2_nakihai;
+            if(substr($haipai->sutehai, 0, 7) == "player1"){
+                $pon_hainomuki = "kp";
+            }
+            if(substr($haipai->sutehai, 0, 7) == "player3"){
+                $pon_hainomuki = "sp";
+            }
         }
         if($request->session()->get('player_no') == "player3"){
             $haipai_data = $haipai->player3_hai;
             $nakihai_data = $haipai->player3_nakihai;
+            if(substr($haipai->sutehai, 0, 7) == "player1"){
+                $pon_hainomuki = "tp";
+            }
+            if(substr($haipai->sutehai, 0, 7) == "player2"){
+                $pon_hainomuki = "kp";
+            }
         }
         $tumo_ban = $request->session()->get('player_no') . "_tumo";
         $p_hai = $request->session()->get('player_no') . '_hai';
@@ -461,9 +516,9 @@ class TestController extends Controller
         $new_sutehai = substr($haipai->sutehai, -2);
 
         if($nakihai_data == ""){
-            $nakihai = $sutehai_player . "," . $new_sutehai . "," . $new_sutehai . "," . $new_sutehai;
+            $nakihai = $pon_hainomuki . $new_sutehai;
         }else{
-            $nakihai = $nakihai_data . "," . $sutehai_player . "," . $new_sutehai . "," . $new_sutehai . "," . $new_sutehai;
+            $nakihai = $nakihai_data . "," . $pon_hainomuki . $new_sutehai;
         }
 
         $hai = explode(',',$haipai_data);
@@ -477,8 +532,7 @@ class TestController extends Controller
                 $dupe_cnt = 0;
             }
         }
-        Log::debug($hai);
-        Log::debug($hai_data);
+
         $hai = substr($hai_data, 0, -1);
         $player_sutehai = $sutehai_player . '_sutehai';
         if(strpos($haipai->$player_sutehai,',') === false){
@@ -527,5 +581,224 @@ class TestController extends Controller
 //        }
         $result = json_encode($res);
         return $result;
+    }
+    public function tenpaicheck($player_hai_data) 
+    {
+        $phai = $this->seiretu($player_hai_data);
+        $hai = explode(',',$phai);
+        $hainom = config('const.haiNom');
+        $hai_data = array();
+        foreach($hai as $val){
+            $hai_data[] = $hainom[$val];
+        }
+        //雀頭候補があるか
+        $mae_hai = "damy";
+        $toitu = 0;
+        $manzu_jihai = 0;
+
+        foreach($hai as $val){
+            if($val == $mae_hai){
+                $toitu = $toitu + 1;
+            }
+            //萬子があるか
+            if($val == '1m'){$manzu_jihai = $manzu_jihai + 1;}
+            if($val == '9m'){$manzu_jihai = $manzu_jihai + 1;}
+            //字牌があるか
+            if($val == '1z'){$manzu_jihai = $manzu_jihai + 1;}
+            if($val == '2z'){$manzu_jihai = $manzu_jihai + 1;}
+            if($val == '3z'){$manzu_jihai = $manzu_jihai + 1;}
+            if($val == '4z'){$manzu_jihai = $manzu_jihai + 1;}
+            if($val == '5z'){$manzu_jihai = $manzu_jihai + 1;}
+            if($val == '6z'){$manzu_jihai = $manzu_jihai + 1;}
+            if($val == '7z'){$manzu_jihai = $manzu_jihai + 1;}
+            $mae_hai = $val;
+        }
+$hoge = array_count_values($hai_data);
+        $result = "";
+        $cnt_arr = count($hai_data);
+        //雀頭候補の判定
+        if($toitu != 0){
+            //字牌、萬子牌の暗刻をカウント
+            $anko_count = 0;
+            $toitu_count = 0;
+            for($i = 18;$i <= 26;$i++){
+                $anko_umu = array_keys($hai_data, $i);
+                if(count($anko_umu) == 2){
+                    $toitu_count = $toitu_count + 1;
+                }
+                if(count($anko_umu) == 3){
+                    $anko_count = $anko_count + 1;
+                }
+            }
+            //筒子の対子をカウント
+            $toitu = 0;
+            for($i = 0;$i <= 6;$i++){
+                $toitu_umu = array_keys($hai_data, $i);
+                if(count($toitu_umu) == 2){
+                    $toitu = $toitu + 1;
+                    $toitu_count = $toitu_count + 1;
+                }
+            }
+            $pinzu_jyuntu_cnt = 0;
+            $sozu_jyuntu_cnt = 0;
+            $jyuntu_anko_ari = 0;
+            $ipeko_ari = 0;
+            if($toitu != 0){
+                $hai_copy = array();
+                $cnt = 0;
+                $jyuntu_ari = 0;
+                foreach($hai_data as $val){
+                    if($cnt == 0 && $jyuntu_anko_ari == 0){
+                        for($i = 0;$i <= 6;$i++){
+                            if($val == $i){
+                                //1個
+                                if($hai_data[$cnt] != $hai_data[$cnt + 1]){
+                                    //順子
+                                    if($hai_data[$cnt + 1] == $i + 1 && $hai_data[$cnt + 2] == $i + 2){
+                                        $pinzu_jyuntu_cnt++;
+                                        $jyuntu_anko_ari++;
+                                    }
+                                }
+                                //2個
+                                if($hai_data[$cnt] == $hai_data[$cnt + 1] && $hai_data[$cnt] != $hai_data[$cnt + 2]){
+                                
+                                }
+                                //3個
+                                if($hai_data[$cnt] == $hai_data[$cnt + 1] && $hai_data[$cnt] == $hai_data[$cnt + 2] && $hai_data[$cnt] != $hai_data[$cnt + 3]){
+                                    $anko_count = $anko_count + 1;
+                                }
+                                //4個
+                                if($hai_data[$cnt] == $hai_data[$cnt + 1] && $hai_data[$cnt] == $hai_data[$cnt + 2] && $hai_data[$cnt] == $hai_data[$cnt + 3]){
+                                    $anko_count = $anko_count + 1;
+                                }
+                            }
+                        }
+                    }else{
+                        //順子があれば該当牌の以降2牌はカウントの判定を行わない
+                        $jyuntu_anko_ari++;
+                        if($jyuntu_anko_ari == 3){
+                            $jyuntu_anko_ari = 0;
+                        }
+                    }
+                    $cnt++;
+                }
+            }else{
+                //筒子の対子なし
+                $pinzu_jyuntu_cnt = $this->jyuntu_only($hai_data,"pinzu");
+            }
+            //索子の対子をカウント
+            $toitu = 0;
+            for($i = 9;$i <= 15;$i++){
+                $toitu_umu = array_keys($hai_data, $i);
+                if(count($toitu_umu) == 2){
+                    $toitu = $toitu + 1;
+                }
+            }
+            if(($anko_count + $pinzu_jyuntu_cnt + $sozu_jyuntu_cnt) == 4){
+
+            }
+        }else{
+            //順子のみ
+            $jyuntu_cnt = $this->jyuntu_only($hai_data,"pinzu_sozu");
+            if($jyuntu_cnt == 4){
+                $result = "tenpai";
+            }
+        }
+        Log::debug($anko_count);
+        return $result;
+    }
+    public function kokusicheck($player_hai_data) 
+    {
+        $kokusi = 0;
+        $mae_hai = "";
+        $mae_mae_hai = "";
+        $toitu = 0;
+        $anko = 0;
+        $hai = explode(',',$player_hai_data);
+        sort($hai);
+        foreach($hai as $val){
+            if($val == "1p"){$kokusi++;}
+            if($val == "9p"){$kokusi++;}
+            if($val == "1s"){$kokusi++;}
+            if($val == "9s"){$kokusi++;}
+            if($val == "1z"){$kokusi++;}
+            if($val == "2z"){$kokusi++;}
+            if($val == "3z"){$kokusi++;}
+            if($val == "4z"){$kokusi++;}
+            if($val == "5z"){$kokusi++;}
+            if($val == "6z"){$kokusi++;}
+            if($val == "7z"){$kokusi++;}
+            if($val == "1m"){$kokusi++;}
+            if($val == "9m"){$kokusi++;}
+            if($val == $mae_hai){$toitu++;}
+            if($val == $mae_mae_hai){$anko++;}
+            $mae_mae_hai = $mae_hai;
+            $mae_hai = $val;
+        }
+        if(($anko == 0 && $toitu == 1 && $kokusi == 13) || ($anko == 0 && $toitu == 1 && $kokusi == 14) || ($anko == 0 && $toitu == 2 && $kokusi == 13) || ($anko == 0 && $toitu == 2 && $kokusi == 14) || ($anko == 0 && $toitu == 0 && $kokusi == 13)){
+            $result = "tenpai";
+        }else{
+            $result = "";
+        }
+        return $result;
+    }
+    public function titoicheck($player_hai_data) 
+    {
+        $titoi = 0;
+        $mae_hai = "";
+        $toitu = 0;
+        $hai = explode(',',$player_hai_data);
+        sort($hai);
+        foreach($hai as $val){
+            if($val == $mae_hai){
+                $toitu++;
+                $mae_hai = "";
+            }else{
+                $mae_hai = $val;
+            }
+        }
+        if($toitu == 6){
+            $result = "tenpai";
+        }else{
+            $result = "";
+        }
+        return $result;
+    }
+    public function jyuntu_only($hai_data,$pinzu_sozu) 
+    {
+        $cnt = 0;
+        $jyuntu_cnt = 0;
+        $jyuntu_ari = 0;
+        foreach($hai_data as $val){
+            //対子が無いのが前提で123,234,345,456,567,678,789の組み合わせがあればカウント
+            if($cnt == 0 || $jyuntu_ari == 0){
+                if($pinzu_sozu == "pinzu_sozu" || $pinzu_sozu == "pinzu"){
+                    //筒子の順子をカウント
+                    for($i = 0;$i <= 6;$i++){
+                        if($hai_data[$cnt] == $i && $hai_data[$cnt + 1] == $i + 1 && $hai_data[$cnt + 2] == $i + 2){
+                            $jyuntu_cnt++;
+                            $jyuntu_ari++;
+                        }
+                    }
+                }
+                if($pinzu_sozu == "pinzu_sozu" || $pinzu_sozu == "sozu"){
+                    //索子の順子をカウント
+                    for($i = 9;$i <= 15;$i++){
+                        if($hai_data[$cnt] == $i && $hai_data[$cnt + 1] == $i + 1 && $hai_data[$cnt + 2] == $i + 2){
+                            $jyuntu_cnt++;
+                            $jyuntu_ari++;
+                        }
+                    }
+                }
+            }else{
+                //順子があれば該当牌の以降2牌はカウントの判定を行わない
+                $jyuntu_ari++;
+                if($jyuntu_ari == 3){
+                    $jyuntu_ari = 0;
+                }
+            }
+            $cnt++;
+        }
+        return $jyuntu_cnt;
     }
 }

@@ -46,94 +46,7 @@
                                 }else{
                                     $('#tumo_span').hide();
                                 }
-                                if(data.message.player1_sutehai != ""){
-                                    var sutehai_arr = data.message.player1_sutehai.split(',');
-                                    var sutehai_disp = "";
-                                    if(player == "player1"){
-                                        sutehai_disp = "#player_sutehai_";
-                                    }
-                                    if(player == "player2"){
-                                        sutehai_disp = "#kamitya_sutehai_";
-                                    }
-                                    if(player == "player3"){
-                                        sutehai_disp = "#toimen_sutehai_";
-                                    }
-                                    disp(sutehai_arr,sutehai_disp);
-                                }
-                                if(data.message.player2_sutehai != ""){
-                                    var sutehai_arr = data.message.player2_sutehai.split(',');
-                                    var sutehai_disp = "";
-                                    if(player == "player1"){
-                                        sutehai_disp = "#simotya_sutehai_";
-                                    }
-                                    if(player == "player2"){
-                                        sutehai_disp = "#player_sutehai_";
-                                    }
-                                    if(player == "player3"){
-                                        sutehai_disp = "#kamitya_sutehai_";
-                                    }
-                                    disp(sutehai_arr,sutehai_disp);
-                                }
-                                if(data.message.player3_sutehai != ""){
-                                    var sutehai_arr = data.message.player3_sutehai.split(',');
-                                    var sutehai_disp = "";
-                                    if(player == "player1"){
-                                        sutehai_disp = "#toimen_sutehai_";
-                                    }
-                                    if(player == "player2"){
-                                        sutehai_disp = "#simotya_sutehai_";
-                                    }
-                                    if(player == "player3"){
-                                        sutehai_disp = "#player_sutehai_";
-                                    }
-                                    disp(sutehai_arr,sutehai_disp);
-                                }
-                                $('#nokori_hai').text(data.message.nokori_hai);
-                                if(data.message.pon != ""){
-                                    $('#pon_span').show();
-                                }else{
-                                    $('#pon_span').hide();
-                                }
-                                if(data.message.tsumo_ban.slice(-5) == "_tumo"){
-                                    tumo_player = data.message.tsumo_ban.slice(0,-5);
-                                }else{
-                                    tumo_player = data.message.tsumo_ban;
-                                }
-                                if(data.message.player1_nakihai != ""){
-                                    if(player == "player1" && data.message.player1_nakihai.length != 0){
-                                        disp_ji_nakihai(data.message.player1_nakihai.split(','));
-                                    }
-                                    if(player == "player2"){
-                                        nakihai_disp = "#kamitya_nakihai_";
-                                    }
-                                    if(player == "player3" && data.message.player1_nakihai.length != 0){
-                                        disp_toimen_nakihai(data.message.player1_nakihai.split(','),data.message.player1_hai);
-                                    }
-                                }
-                                if(data.message.player2_nakihai != ""){
-                                    if(player == "player1"){
-                                        nakihai_disp = "#simotya_nakihai_";
-                                    }
-                                    if(player == "player2" && data.message.player2_nakihai.length != 0){
-                                        disp_ji_nakihai(data.message.player2_nakihai.split(','));
-                                    }
-                                    if(player == "player3"){
-                                        nakihai_disp = "#kamitya_nakihai_";
-                                    }
-                                }
-                                if(data.message.player3_nakihai != ""){
-                                    if(player == "player1" && data.message.player3_nakihai.length != 0){
-                                        disp_toimen_nakihai(data.message.player3_nakihai.split(','),data.message.player3_hai);
-                                    }
-                                    if(player == "player2"){
-                                        nakihai_disp = "#simotya_nakihai_";
-                                    }
-                                    if(player == "player3" && data.message.player3_nakihai.length != 0){
-                                        disp_ji_nakihai(data.message.player3_nakihai.split(','));
-                                    }
-                                }
-
-//                                    $('#ji_naki').append(hoge);
+                                update_disp(data);
                             }
                         })
                         // Ajaxリクエストが失敗した場合
@@ -141,7 +54,7 @@
                             alert("接続失敗");
                         });
                 }
-            },5000);
+            },2000);
             var tehais = $('[id^=tehai_]').length;
             for (var i = 0; i <= tehais; i++) {
                 var select = "#tehai_" + String(i);
@@ -177,6 +90,7 @@
                             .done(function(data) {
                                 if (data.result == "OK") {
                                     $('#tehai_tumo').hide();
+                                    $('#reach_span').hide();
                                     disp_tehai_sutehai(data);
                                 }
                                 ck_flg = "";
@@ -191,6 +105,97 @@
                         }
                     }
                 });
+            }
+            function update_disp(data){
+                if(data.message.player1_sutehai != ""){
+                    var sutehai_data = data.message.player1_sutehai;
+                    var sutehai_arr = sutehai_data.split(',');
+                    var sutehai_disp = "";
+                    if(player == "player1"){
+                        sutehai_disp = "#player_sutehai_";
+                    }
+                    if(player == "player2"){
+                        sutehai_disp = "#kamitya_sutehai_";
+                    }
+                    if(player == "player3"){
+                        sutehai_disp = "#toimen_sutehai_";
+                    }
+                    disp(sutehai_arr,sutehai_disp);
+                }
+                if(data.message.player2_sutehai != ""){
+                    var sutehai_data = data.message.player2_sutehai;
+                    var sutehai_arr = sutehai_data.split(',');
+                    var sutehai_disp = "";
+                    if(player == "player1"){
+                        sutehai_disp = "#simotya_sutehai_";
+                    }
+                    if(player == "player2"){
+                        sutehai_disp = "#player_sutehai_";
+                    }
+                    if(player == "player3"){
+                        sutehai_disp = "#kamitya_sutehai_";
+                    }
+                    disp(sutehai_arr,sutehai_disp);
+                }
+                if(data.message.player3_sutehai != ""){
+                    var sutehai_data = data.message.player3_sutehai;
+                    var sutehai_arr = sutehai_data.split(',');
+                    var sutehai_disp = "";
+                    if(player == "player1"){
+                        sutehai_disp = "#toimen_sutehai_";
+                    }
+                    if(player == "player2"){
+                        sutehai_disp = "#simotya_sutehai_";
+                    }
+                    if(player == "player3"){
+                        sutehai_disp = "#player_sutehai_";
+                    }
+                    disp(sutehai_arr,sutehai_disp);
+                }
+                $('#nokori_hai').text(data.message.nokori_hai);
+                if(data.message.pon != ""){
+                    $('#pon_span').show();
+                }else{
+                    $('#pon_span').hide();
+                }
+                if(data.message.tsumo_ban.slice(-5) == "_tumo"){
+                    tumo_player = data.message.tsumo_ban.slice(0,-5);
+                }else{
+                    tumo_player = data.message.tsumo_ban;
+                }
+                if(data.message.player1_nakihai != ""){
+                    if(player == "player1" && data.message.player1_nakihai.length != 0){
+                        disp_nakihai(data.message.player1_nakihai.split(','),0,"ji");
+                    }
+                    if(player == "player2"){
+                        disp_nakihai(data.message.player1_nakihai.split(','),data.message.player1_hai,"kamitya");
+                    }
+                    if(player == "player3" && data.message.player1_nakihai.length != 0){
+                        disp_nakihai(data.message.player1_nakihai.split(','),data.message.player1_hai,"toimen");
+                    }
+                }
+                if(data.message.player2_nakihai != ""){
+                    if(player == "player1"){
+                        disp_nakihai(data.message.player2_nakihai.split(','),data.message.player2_hai,"kamitya");
+                    }
+                    if(player == "player2" && data.message.player2_nakihai.length != 0){
+                        disp_nakihai(data.message.player2_nakihai.split(','),0,"ji");
+                    }
+                    if(player == "player3"){
+                        disp_nakihai(data.message.player2_nakihai.split(','),data.message.player2_hai,"simotya");
+                    }
+                }
+                if(data.message.player3_nakihai != ""){
+                    if(player == "player1" && data.message.player3_nakihai.length != 0){
+                        disp_nakihai(data.message.player3_nakihai.split(','),data.message.player3_hai,"toimen");
+                    }
+                    if(player == "player2"){
+                        disp_nakihai(data.message.player3_nakihai.split(','),data.message.player3_hai,"simotya");
+                    }
+                    if(player == "player3" && data.message.player3_nakihai.length != 0){
+                        disp_nakihai(data.message.player3_nakihai.split(','),0,"ji");
+                    }
+                }
             }
             function disp_tehai_sutehai(data){
                 var hai_disp = "#tehai_";
@@ -267,114 +272,44 @@
                     }
                 }
             }
-            function disp_ji_nakihai(nakihai_arr){
+            function disp_nakihai(nakihai_arr,hai_count = 0,position = ""){
                 path = $('#tehai_0').attr('src').slice(0,-6);
                 new_path = "";
-                var naki_player = "";
-                var rotate = "0";
-                $("#ji_naki").empty();
+                select_id = "#" + position + "_naki";
+                $(select_id).empty();
+                var img = '';
                 for(var i=0; i < nakihai_arr.length; i++){
-                    if(nakihai_arr[i] == "player1"){
-                        naki_player = "player1";
-                        rotate = "1";
+                    new_path = path + nakihai_arr[i] + ".png";
+                    if(position == "ji"){
+                        img = '<img src= ' + new_path + '>';
                     }
-                    if(nakihai_arr[i] == "player2"){
-                        naki_player = "player2";
-                        rotate = "2";
+                    if(position == "toimen"){
+                        img = '<img class="rotate1" src= ' + new_path + '>';
                     }
-                    if(nakihai_arr[i] == "player3"){
-                        naki_player = "player3";
-                        rotate = "1";
+                    if(position == "kamitya"){
+                        img = '<img class="rotate" src= ' + new_path + '><br><br><br><br>';
                     }
-                    if(nakihai_arr[i] != "player1" && nakihai_arr[i] != "player2" && nakihai_arr[i] != "player3"){
-                        if(naki_player == "player1"){
-                            new_path = path + nakihai_arr[i] + ".png";
-                            if(rotate == "1"){
-                                $('#ji_naki').append('<img src= ' + new_path + '>');
-                                rotate = "0";
-                            }else{
-//                                                        $('#ji_naki').append('<img class="rotate" src= ' + new_path + '>');
-                                $('#ji_naki').append('<img src= ' + new_path + '>');
-                                rotate = "1";
-                            }
+                    if(position == "simotya"){
+                        img = '<img class="rotate2" src= ' + new_path + '><br>';
+                        if( i > 1){
+                            img = img + '<br><br><br>';
                         }
-                        if(naki_player == "player2"){
-                            new_path = path + nakihai_arr[i] + ".png";
-                            if(rotate == "2"){
-//                                                        $('#ji_naki').append('<img class="rotate2" src= ' + new_path + '>');
-                                $('#ji_naki').append('<img src= ' + new_path + '>');
-                                rotate = "0";
-                            }else{
-                                $('#ji_naki').append('<img src= ' + new_path + '>');
-                                rotate = "0";
-                            }
-                        }
-                        if(naki_player == "player3"){
-                            new_path = path + nakihai_arr[i] + ".png";
-                                $('#ji_naki').append('<img src= ' + new_path + '>');
-                        }
+                    }
+                    $(select_id).append(img);
+                }
+                if(position != "ji"){
+                    var cnt = 0;
+                    for(var i=0; i < hai_count;i++){
+                        select_id = "#" + position + "_tehai_" +String(i);
+                        $(select_id).show();
+                    }
+                    var hai = 13 - hai_count;
+                    for(var i=0; i < hai; i++){
+                        select_id = "#" + position + "_tehai_" + String(i + hai_count);
+                        $(select_id).hide();
                     }
                 }
-            }
-            function disp_toimen_nakihai(nakihai_arr,hai_count){
-                path = $('#tehai_0').attr('src').slice(0,-6);
-                new_path = "";
-                var naki_player = "";
-                var rotate = "0";
-                $("#toimen_naki").empty();
-                for(var i = 0; i < nakihai_arr.length; i++){
-                    if(nakihai_arr[i] == "player1"){
-                        naki_player = "player1";
-                        rotate = "1";
-                    }
-                    if(nakihai_arr[i] == "player2"){
-                        naki_player = "player2";
-                        rotate = "2";
-                    }
-                    if(nakihai_arr[i] == "player3"){
-                        naki_player = "player3";
-                        rotate = "3";
-                    }
-                    if(nakihai_arr[i] != "player1" && nakihai_arr[i] != "player2" && nakihai_arr[i] != "player3"){
-                        if(naki_player == "player1"){
-                            new_path = path + nakihai_arr[i] + ".png";
-                            if(rotate == "1"){
-                                $('#toimen_naki').append('<img class="rotate1" src= ' + new_path + '>');
-                                rotate = "0";
-                            }else{
-//                                                        $('#ji_naki').append('<img class="rotate" src= ' + new_path + '>');
-                                $('#toimen_naki').append('<img  class="rotate1" src= ' + new_path + '>');
-                                rotate = "1";
-                            }
-                        }
-                        if(naki_player == "player2"){
-                            new_path = path + nakihai_arr[i] + ".png";
-                            if(rotate == "2"){
-//                                                        $('#ji_naki').append('<img class="rotate2" src= ' + new_path + '>');
-                                $('#toimen_naki').append('<img class="rotate1" src= ' + new_path + '>');
-                                rotate = "0";
-                            }else{
-                                $('#toimen_naki').append('<img class="rotate1" src= ' + new_path + '>');
-                                rotate = "0";
-                            }
-                        }
-                        if(naki_player == "player3"){
-                            new_path = path + nakihai_arr[i] + ".png";
-                            if(rotate == "3"){
-                                $('#toimen_naki').append('<img class="rotate1" src= ' + new_path + '>');
-                                rotate = "0";
-                            }else{
-                                $('#toimen_naki').append('<img class="rotate1" src= ' + new_path + '>');
-                                rotate = "0";
-                            }
-                        }
-                    }
-                }
-                var hai = 13 - hai_count;
-                for(var i=0; i < hai; i++){
-                    select_id = "#toimen_tehai_" + String(i + hai_count);
-                    $(select_id).hide();
-                }
+
             }
             $('#tehai_tumo').on('click', function() {
                 if(ck_flg == "tumo_ban" && click_ck == ""){
@@ -398,6 +333,7 @@
                         if (data.result == "OK") {
                             $('#tumo_span').hide();
                             $('#tehai_tumo').hide();
+                            $('#reach_span').hide();
                             disp_tehai_sutehai(data);
                             ck_flg = "";
                         }
@@ -432,6 +368,8 @@
                             new_path = path + data.message + ".png";
                             $('#tehai_tumo').attr('src', new_path);
                             $('#tehai_tumo').attr('value', data.message);
+                            $('#reach_span').show();
+
                             $('#tehai_tumo').show();
                             $('#tehai_tumo').hover(function() {
                                 //マウスを乗せたら色が変わる
@@ -483,95 +421,8 @@
                                 var hai_arr = data.message.player3_hai.split(',');
                             }
                             disp(hai_arr,hai_disp,tehai = "tehai",pon = "pon");
-                            if(data.message.player1_sutehai != ""){
-                                var sutehai_data = data.message.player1_sutehai;
-                                var sutehai_arr = sutehai_data.split(',');
-                                var sutehai_disp = "";
-                                if(player == "player1"){
-                                    sutehai_disp = "#player_sutehai_";
-                                }
-                                if(player == "player2"){
-                                    sutehai_disp = "#kamitya_sutehai_";
-                                }
-                                if(player == "player3"){
-                                    sutehai_disp = "#toimen_sutehai_";
-                                }
-                                disp(sutehai_arr,sutehai_disp);
-                            }
-                            if(data.message.player2_sutehai != ""){
-                                var sutehai_data = data.message.player2_sutehai;
-                                var sutehai_arr = sutehai_data.split(',');
-                                var sutehai_disp = "";
-                                if(player == "player1"){
-                                    sutehai_disp = "#simotya_sutehai_";
-                                }
-                                if(player == "player2"){
-                                    sutehai_disp = "#player_sutehai_";
-                                }
-                                if(player == "player3"){
-                                    sutehai_disp = "#kamitya_sutehai_";
-                                }
-                                disp(sutehai_arr,sutehai_disp);
-                            }
-                            if(data.message.player3_sutehai != ""){
-                                var sutehai_data = data.message.player3_sutehai;
-                                var sutehai_arr = sutehai_data.split(',');
-                                var sutehai_disp = "";
-                                if(player == "player1"){
-                                    sutehai_disp = "#toimen_sutehai_";
-                                }
-                                if(player == "player2"){
-                                    sutehai_disp = "#simotya_sutehai_";
-                                }
-                                if(player == "player3"){
-                                    sutehai_disp = "#player_sutehai_";
-                                }
-                                disp(sutehai_arr,sutehai_disp);
-                            }
-                            $('#nokori_hai').text(data.message.nokori_hai);
-                            if(data.message.pon != ""){
-                                $('#pon_span').show();
-                            }else{
-                                $('#pon_span').hide();
-                            }
-                            if(data.message.tsumo_ban.slice(-5) == "_tumo"){
-                                tumo_player = data.message.tsumo_ban.slice(0,-5);
-                            }else{
-                                tumo_player = data.message.tsumo_ban;
-                            }
-                            if(data.message.player1_nakihai != ""){
-                                if(player == "player1"){
-                                    disp_ji_nakihai(data.message.player1_nakihai.split(','));
-                                }
-                                if(player == "player2"){
-                                    nakihai_disp = "#kamitya_nakihai_";
-                                }
-                                if(player == "player3"){
-                                    nakihai_disp = "#toimen_nakihai_";
-                                }
-                            }
-                            if(data.message.player2_nakihai != ""){
-                                if(player == "player1"){
-                                    nakihai_disp = "#simotya_nakihai_";
-                                }
-                                if(player == "player2"){
-                                    disp_ji_nakihai(data.message.player2_nakihai.split(','));
-                                }
-                                if(player == "player3"){
-                                    nakihai_disp = "#kamitya_nakihai_";
-                                }
-                            }
-                            if(data.message.player3_nakihai != ""){
-                                if(player == "player1"){
-                                    nakihai_disp = "#toimen_nakihai_";
-                                }
-                                if(player == "player2"){
-                                    nakihai_disp = "#simotya_nakihai_";
-                                }
-                                if(player == "player3"){
-                                    disp_ji_nakihai(data.message.player3_nakihai.split(','));
-                                }
-                            }
+
+                            update_disp(data);
                             ck_flg = "tumo_ban";
                             ponkan = "ponkan";
                             click_ck = "";
@@ -605,8 +456,8 @@
         <span id="player1_name">{{$game_status->user1}}</span> 持ち点 {{$game_status->player1_ten}}<br>
         @endif
         @if(Session::get('player_no') =="player1" || Session::get('player_no') =="player3")
+            {{-- 対面鳴き牌 --}}
             <span id="toimen_naki"></span>
-            
             <?php
                 //対面手牌
                 if(Session::get('player_no') =="player1"){
@@ -650,41 +501,25 @@
                     //上家手牌
                     if(Session::get('player_no') =="player2"){
                         $tehai = explode(',',$haipai->player1_hai);
-                        foreach($tehai as $val){
-                            $img_path= asset("/img/hai/yoko.png");
-                            echo "<img class=\"rotate\" src= " . $img_path . "><br>";
-                        }
                     }
                     if(Session::get('player_no') =="player3"){
                         $tehai = explode(',',$haipai->player2_hai);
+                    }
+                    if(Session::get('player_no') !="player1"){
+                        $cnt = 0;
+                        $img = "";
                         foreach($tehai as $val){
+                            $id = "id=\"kamitya_tehai_" . $cnt . "\""; 
                             $img_path= asset("/img/hai/yoko.png");
-                            echo "<img class=\"rotate\" src= " . $img_path . "><br>";
+                            $img .= "<img " . $id . "class=\"rotate\" src= " . $img_path . "></br>";
+                            $cnt++;
                         }
+                        echo $img;
                     }
                 ?>
-                <span id="kamitya_naki"></span>
-                <?php
-                    //上家鳴き牌
-                    if(Session::get('player_no') =="player2"){
-                        $nakihai = explode(',',$haipai->player1_nakihai);
-                        foreach($nakihai as $val){
-                            if($val != null){
-                                $img_path= asset("/img/hai/" . $val . ".png");
-                                echo "<img class=\"rotate\" src= " . $img_path . "><br>";
-                            }
-                        }
-                    }
-                    if(Session::get('player_no') =="player3"){
-                        $nakihai = explode(',',$haipai->player2_nakihai);
-                        foreach($nakihai as $val){
-                            if($val != null){
-                                $img_path= asset("/img/hai/" . $val . ".png");
-                                echo "<img class=\"rotate\" src= " . $img_path . "><br>";
-                            }
-                        }
-                    }
-                ?><br>
+                
+                {{-- 上家鳴き牌 --}}
+                <span id="kamitya_naki"></span><br>
             @endif
         </aside>
         <article class="center">
@@ -863,56 +698,39 @@
         {{-- 下家 --}}
         <aside class="side">
             @if(Session::get('player_no') =="player1" || Session::get('player_no') =="player2")
+                @if($game_status->oya_ban == "player2")
+                    親
+                @endif
+                @if($game_status->oya_ban == "player3")
+                    親
+                @endif
                 @if(Session::get('player_no') =="player1")
-                    @if($game_status->oya_ban == "player2")
-                        親
-                    @endif
                     <span id="player2_name">{{$game_status->user2}}</span><br>
-                    持ち点 {{$game_status->player2_ten}}<br><br>
-                    <?php
-                        //下家鳴き牌
-                        $nakihai = explode(',',$haipai->player2_nakihai);
-                        foreach($nakihai as $val){
-                            if($val != null){
-                                $img_path= asset("/img/hai/" . $val . ".png");
-                                echo "<img class=\"rotate2\" src= " . $img_path . "><br>";
-                            }
-                        }
-                    ?>
-                    <?php
-                        //下家手牌
-                        $tehai = explode(',',$haipai->player2_hai);
-                        foreach($tehai as $val){
-                            $img_path= asset("/img/hai/yoko.png");
-                            echo "<img class=\"rotate2\" src= " . $img_path . "><br>";
-                        }
-                    ?><br>
-                @endif
-                @if(Session::get('player_no') =="player2")
-                    @if($game_status->oya_ban == "player3")
-                        親
-                    @endif
+                    持ち点 {{$game_status->player2_ten}}<br><br><br>
+                @else
                     <span id="player3_name">{{$game_status->user3}}</span><br>
-                    持ち点 {{$game_status->player3_ten}}<br><br>
-                    <?php
-                        //下家鳴き牌
-                        $nakihai = explode(',',$haipai->player1_nakihai);
-                        foreach($nakihai as $val){
-                            if($val != null){
-                                $img_path= asset("/img/hai/" . $val . ".png");
-                                echo "<img class=\"rotate2\" src= " . $img_path . "><br>";
-                            }
-                        }
-                    ?>
-                    <?php
-                        //下家手牌
-                        $tehai = explode(',',$haipai->player1_hai);
-                        foreach($tehai as $val){
-                            $img_path= asset("/img/hai/yoko.png");
-                            echo "<img class=\"rotate2\" src= " . $img_path . "><br>";
-                        }
-                    ?><br>
+                    持ち点 {{$game_status->player3_ten}}<br><br><br>
                 @endif
+                {{-- 下家鳴き牌 --}}
+                <span id="simotya_naki"></span><br><br><br><br>
+                <?php
+                //下家手牌
+                if(Session::get('player_no') =="player1"){
+                    $tehai = explode(',',$haipai->player2_hai);
+                }
+                if(Session::get('player_no') =="player2"){
+                    $tehai = explode(',',$haipai->player3_hai);
+                }
+                if(Session::get('player_no') !="player3"){
+                    $cnt = 0;
+                    foreach($tehai as $val){
+                        $id = "id=\"simotya_tehai_" . $cnt . "\""; 
+                        $img_path= asset("/img/hai/yoko.png");
+                        echo "<img " . $id . "class=\"rotate2\" src= " . $img_path . "></br>";
+                        $cnt++;
+                    }
+                }
+                ?><br>
             @endif
         </aside>
         </main>
@@ -966,6 +784,7 @@
         <span id="lon_span" style="display:none;"><button id="lon" type="button">ロン</button></span>
         <span id="pon_span" style="display:none;"><button id="pon" type="button">ポン</button></span>
         <span id="kan_span" style="display:none;"><button id="kan" type="button">カン</button></span>
+        <span id="reach_span" style="display:none;"><button id="reach" type="button">リーチ</button></span>
         <span id="tumoagari_span" style="display:none;"><button id="tumoagari"" type="button">ツモ上がり</button></span>
         </footer>
     </body>
