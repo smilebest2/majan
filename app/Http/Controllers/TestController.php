@@ -137,12 +137,21 @@ class TestController extends Controller
             if($player_nakihai != ""){
                 if(strpos($player_nakihai, ',') == false){
                     $p_nakihai = $player_nakihai;
+                    if(substr($p_nakihai, 2, 1) == "p"){
+                        $nakihai = substr($val, 3, 2) . "," . substr($val, 3, 2) . "," . substr($val, 3, 2);
+                    }
+                    if(substr($p_nakihai, 2, 1) == "k"){
+                        $nakihai = substr($val, 3, 2) . "," . substr($val, 3, 2) . "," . substr($val, 3, 2) . "," . substr($val, 3, 2);
+                    }
                 }else{
                     $p_nakihai = explode(',',$player_nakihai);
-                }
-                foreach($p_nakihai as $val){
-                    if(substr($val, 2, 1) == "p"){
-                        $nakihai .= "," . substr($val, 3, 2) . "," . substr($val, 3, 2) . "," . substr($val, 3, 2);
+                    foreach($p_nakihai as $val){
+                        if(substr($val, 2, 1) == "p"){
+                            $nakihai .= "," . substr($val, 3, 2) . "," . substr($val, 3, 2) . "," . substr($val, 3, 2);
+                        }
+                        if(substr($val, 2, 1) == "k"){
+                            $nakihai .= "," . substr($val, 3, 2) . "," . substr($val, 3, 2) . "," . substr($val, 3, 2) . "," . substr($val, 3, 2);
+                        }
                     }
                 }
                 $p_hai = $player_hai . "," . $tumohai . $nakihai;
