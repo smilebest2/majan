@@ -8,6 +8,37 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 class TestController extends Controller
 {
+
+    //マンズ関連
+    public $manMentsuMax = 0;
+    public $manTaatsuMax = 0;
+
+    //ピンズ関連
+    public $pinMentsuMax = 0;
+    public $pinTaatsuMax = 0;
+
+    //ソーズ関連
+    public $souMentsuMax = 0;
+    public $souTaatsuMax = 0;
+
+    //字牌関連
+    public $jiTaatsuMax = 0;
+
+    public $preMentsuCount = 0;//kanzen_koutsu_suuとkanzen_shuntsu_suu格納用
+    public $koutsuCount = 0;//コーツ数カウント用
+    public $adjustment = 0;
+    public $tempTehai = Array();
+    public $toitsu_suu=0;//トイツ数
+    public $koutsu_suu=0;//コーツ数
+    public $shuntsu_suu=0;//シュンツ数
+    public $taatsu_suu=0;//ターツ数
+    public $mentsu_suu=0;//メンツ数
+    public $kanzen_koutsu_suu=0;//完全コーツ数
+    public $kanzen_shuntsu_suu=0;//完全シュンツ数
+    public $syanten_temp=0;//シャンテン数（計算用）
+    public $syanten_normal=8;//シャンテン数（結果用）
+    public $kanzen_Koritsu_suu=0;//完全孤立牌数
+
     public function index (Request $request) 
     {
         $wait="";
@@ -91,20 +122,40 @@ class TestController extends Controller
             if($request->session()->get('player_no') == "player1"){
                 $player_hai = $haipai->player1_hai;
                 $player_nakihai = $haipai->player1_nakihai;
+                $player_reach = $haipai->player1_reach;
             }
             if($request->session()->get('player_no') == "player2"){
                 $player_hai = $haipai->player2_hai;
                 $player_nakihai = $haipai->player2_nakihai;
+                $player_reach = $haipai->player2_reach;
             }
             if($request->session()->get('player_no') == "player3"){
                 $player_hai = $haipai->player3_hai;
-                $player_nakihai = $haipai->player2_nakihai;
+                $player_nakihai = $haipai->player3_nakihai;
+                $player_reach = $haipai->player3_reach;
+            }
+            if($player_nakihai != ""){
+                if(strpos($player_nakihai, ',') == false){
+                    $p_nakihai = $player_nakihai;
+                }else{
+                    $p_nakihai = explode(',',$player_nakihai);
+                }
+                foreach($p_nakihai as $val){
+                    if(substr($val, 2, 1) == "p"){
+                        $nakihai .= "," . substr($val, 3, 2) . "," . substr($val, 3, 2) . "," . substr($val, 3, 2);
+                    }
+                }
+                $p_hai = $player_hai . "," . $tumohai . $nakihai;
+            }else{
+                $p_hai = $player_hai . "," . $tumohai;
             }
             $p_hai = $player_hai . "," . $tumohai;
-            $tempai = "";
-// todoリーチボタン制御は保留
-/*
+            $request->session()->put('tumohai', $tumohai);
+
+            $tenpai = "";
             if($player_nakihai == ""){
+                $tenpai = "tenpai";
+/*
                 $tempai = $this->titoicheck($p_hai);
                 if($tempai == ""){
                     $tempai = $this->kokusicheck($p_hai);
@@ -112,8 +163,8 @@ class TestController extends Controller
                 if($tempai == ""){
                     $tempai = $this->tenpaicheck($p_hai);
                 }
-            }
 */
+            }
         }else{
             $user_no = "user" . substr($tumo_player, -1);
             $message = $game_status->$user_no . "が鳴きました";
@@ -123,7 +174,7 @@ class TestController extends Controller
         }
         
         if($game_status->status == 1){
-            $res = ['result'=>'OK','message'=>$tumohai,'tenpai'=>$tempai];
+            $res = ['result'=>'OK','message'=>$tumohai,'tenpai'=>$tenpai,'reach'=>$player_reach];
             $result = json_encode($res);
             return $result;
         }else{
@@ -147,10 +198,15 @@ class TestController extends Controller
             $player_sutehai = $haipai->player3_sutehai;
             $player_hai = explode(',',$haipai->player3_hai);
         }
-        if($player_sutehai !=""){
-            $sutehai_data = $player_sutehai . "," . $request['sutehai'];
+        if($request['reach'] == "reach"){
+            $reach = "r";
         }else{
-            $sutehai_data = $request['sutehai'];
+            $reach = "";
+        }
+        if($player_sutehai !=""){
+            $sutehai_data = $player_sutehai . "," . $reach . $request['sutehai'];
+        }else{
+            $sutehai_data = $reach . $request['sutehai'];
         }
         if($request['tumohai'] != "" || $request['ponkan'] == "ponkan"){
             $dupe = "";
@@ -229,12 +285,15 @@ class TestController extends Controller
         $nokori = explode(',',$haipai->nokori_hai);
         $haipai_data['player1_sutehai'] = $haipai->player1_sutehai;
         $haipai_data['player1_nakihai'] = $haipai->player1_nakihai;
+        $haipai_data['player1_reach'] = $haipai->player1_reach;
         $haipai_data['player1_ponkan'] = $haipai->player1_ponkan;
         $haipai_data['player2_sutehai'] = $haipai->player2_sutehai;
         $haipai_data['player2_nakihai'] = $haipai->player2_nakihai;
+        $haipai_data['player2_reach'] = $haipai->player2_reach;
         $haipai_data['player2_ponkan'] = $haipai->player2_ponkan;
         $haipai_data['player3_sutehai'] = $haipai->player3_sutehai;
         $haipai_data['player3_nakihai'] = $haipai->player3_nakihai;
+        $haipai_data['player3_reach'] = $haipai->player3_reach;
         $haipai_data['player3_ponkan'] = $haipai->player3_ponkan;
         $haipai_data['nokori_hai'] = count($nokori);
         $haipai_data['tsumo_ban'] = $haipai->tsumo_ban;
@@ -312,14 +371,17 @@ class TestController extends Controller
             'player1_hai' => $player1_hai,
             'player1_sutehai' => "",
             'player1_nakihai' => "",
+            'player1_reach' => "",
             'player1_ponkan' => "",
             'player2_hai' => $player2_hai,
             'player2_sutehai' => "",
             'player2_nakihai' => "",
+            'player2_reach' => "",
             'player2_ponkan' => "",
             'player3_hai' => $player3_hai,
             'player3_sutehai' => "",
             'player3_nakihai' => "",
+            'player3_reach' => "",
             'player3_ponkan' => "",
             'dorayama_hai' => $dora_yama,
             'nokori_hai' => $nokori_hai,
@@ -418,14 +480,17 @@ class TestController extends Controller
         $haipai_data['player1_hai'] = count($p1_hai);
         $haipai_data['player1_sutehai'] = $haipai->player1_sutehai;
         $haipai_data['player1_nakihai'] = $haipai->player1_nakihai;
+        $haipai_data['player1_reach'] = $haipai->player1_reach;
         $haipai_data['player1_ponkan'] = $haipai->player1_ponkan;
         $haipai_data['player2_hai'] = count($p2_hai);
         $haipai_data['player2_sutehai'] = $haipai->player2_sutehai;
         $haipai_data['player2_nakihai'] = $haipai->player2_nakihai;
+        $haipai_data['player2_reach'] = $haipai->player2_reach;
         $haipai_data['player2_ponkan'] = $haipai->player2_ponkan;
         $haipai_data['player3_hai'] = count($p3_hai);
         $haipai_data['player3_sutehai'] = $haipai->player3_sutehai;
         $haipai_data['player3_nakihai'] = $haipai->player3_nakihai;
+        $haipai_data['player3_reach'] = $haipai->player3_reach;
         $haipai_data['player3_ponkan'] = $haipai->player3_ponkan;
         $haipai_data['nokori_hai'] = count($nokori);
         $haipai_data['tsumo_ban'] = $tsumo_ban;
@@ -563,12 +628,15 @@ class TestController extends Controller
         $nokori = explode(',',$haipai->nokori_hai);
         $haipai_data['player1_sutehai'] = $haipai->player1_sutehai;
         $haipai_data['player1_nakihai'] = $haipai->player1_nakihai;
+        $haipai_data['player1_reach'] = $haipai->player1_reach;
         $haipai_data['player1_ponkan'] = $haipai->player1_ponkan;
         $haipai_data['player2_sutehai'] = $haipai->player2_sutehai;
         $haipai_data['player2_nakihai'] = $haipai->player2_nakihai;
+        $haipai_data['player2_reach'] = $haipai->player2_reach;
         $haipai_data['player2_ponkan'] = $haipai->player2_ponkan;
         $haipai_data['player3_sutehai'] = $haipai->player3_sutehai;
         $haipai_data['player3_nakihai'] = $haipai->player3_nakihai;
+        $haipai_data['player3_reach'] = $haipai->player3_reach;
         $haipai_data['player3_ponkan'] = $haipai->player3_ponkan;
         $haipai_data['nokori_hai'] = count($nokori);
         $haipai_data['tsumo_ban'] = $haipai->tsumo_ban;
@@ -591,130 +659,323 @@ class TestController extends Controller
         foreach($hai as $val){
             $hai_data[] = $hainom[$val];
         }
-        //雀頭候補があるか
-        $mae_hai = "damy";
-        $toitu = 0;
-        $manzu_jihai = 0;
+        $this->tempTehai = array_count_values($hai_data);
 
-        foreach($hai as $val){
-            if($val == $mae_hai){
-                $toitu = $toitu + 1;
+        //前もって完全なシュンツ・コーツ・孤立牌を抜いておく
+        $this->kanzen_koutsu_suu = $this->kanzenkoutsucheck();
+
+        $this->kanzen_shuntsu_suu = $this->kanzenshuntsucheck();
+
+        $this->preMentsuCount = $this->kanzen_koutsu_suu + $this->kanzen_shuntsu_suu;
+        //5枚目の単騎待ちを阻止する処置
+        $kanzen_Koritsu_suu = $this->kanzenkoritsucheck();
+
+        //雀頭抜き出し→コーツ抜き出し→シュンツ抜き出し→ターツ候補抜き出し
+        for($i = 0;$i < 27;$i++){
+            //頭抜き出し
+            if(isset($this->tempTehai[$i])){
+                if($this->tempTehai[$i]>=2){
+                    $this->toitsu_suu++;
+                    $this->tempTehai[$i]-=2;
+                    $this->mentu_cut1(1);
+                    $this->tempTehai[$i]+=2;
+                    $this->toitsu_suu--;
+                }
             }
-            //萬子があるか
-            if($val == '1m'){$manzu_jihai = $manzu_jihai + 1;}
-            if($val == '9m'){$manzu_jihai = $manzu_jihai + 1;}
-            //字牌があるか
-            if($val == '1z'){$manzu_jihai = $manzu_jihai + 1;}
-            if($val == '2z'){$manzu_jihai = $manzu_jihai + 1;}
-            if($val == '3z'){$manzu_jihai = $manzu_jihai + 1;}
-            if($val == '4z'){$manzu_jihai = $manzu_jihai + 1;}
-            if($val == '5z'){$manzu_jihai = $manzu_jihai + 1;}
-            if($val == '6z'){$manzu_jihai = $manzu_jihai + 1;}
-            if($val == '7z'){$manzu_jihai = $manzu_jihai + 1;}
-            $mae_hai = $val;
         }
-$hoge = array_count_values($hai_data);
+        
+        //最終的な結果
         $result = "";
-        $cnt_arr = count($hai_data);
-        //雀頭候補の判定
-        if($toitu != 0){
-            //字牌、萬子牌の暗刻をカウント
-            $anko_count = 0;
-            $toitu_count = 0;
-            for($i = 18;$i <= 26;$i++){
-                $anko_umu = array_keys($hai_data, $i);
-                if(count($anko_umu) == 2){
-                    $toitu_count = $toitu_count + 1;
-                }
-                if(count($anko_umu) == 3){
-                    $anko_count = $anko_count + 1;
-                }
-            }
-            //筒子の対子をカウント
-            $toitu = 0;
-            for($i = 0;$i <= 6;$i++){
-                $toitu_umu = array_keys($hai_data, $i);
-                if(count($toitu_umu) == 2){
-                    $toitu = $toitu + 1;
-                    $toitu_count = $toitu_count + 1;
-                }
-            }
-            $pinzu_jyuntu_cnt = 0;
-            $sozu_jyuntu_cnt = 0;
-            $jyuntu_anko_ari = 0;
-            $ipeko_ari = 0;
-            if($toitu != 0){
-                $hai_copy = array();
-                $cnt = 0;
-                $jyuntu_ari = 0;
-                foreach($hai_data as $val){
-                    if($cnt == 0 && $jyuntu_anko_ari == 0){
-                        for($i = 0;$i <= 6;$i++){
-                            if($val == $i){
-                                //1個
-                                if($hai_data[$cnt] != $hai_data[$cnt + 1]){
-                                    //順子
-                                    if($hai_data[$cnt + 1] == $i + 1 && $hai_data[$cnt + 2] == $i + 2){
-                                        $pinzu_jyuntu_cnt++;
-                                        $jyuntu_anko_ari++;
-                                    }
-                                }
-                                //2個
-                                if($hai_data[$cnt] == $hai_data[$cnt + 1] && $hai_data[$cnt] != $hai_data[$cnt + 2]){
-                                
-                                }
-                                //3個
-                                if($hai_data[$cnt] == $hai_data[$cnt + 1] && $hai_data[$cnt] == $hai_data[$cnt + 2] && $hai_data[$cnt] != $hai_data[$cnt + 3]){
-                                    $anko_count = $anko_count + 1;
-                                }
-                                //4個
-                                if($hai_data[$cnt] == $hai_data[$cnt + 1] && $hai_data[$cnt] == $hai_data[$cnt + 2] && $hai_data[$cnt] == $hai_data[$cnt + 3]){
-                                    $anko_count = $anko_count + 1;
-                                }
-                            }
-                        }
-                    }else{
-                        //順子があれば該当牌の以降2牌はカウントの判定を行わない
-                        $jyuntu_anko_ari++;
-                        if($jyuntu_anko_ari == 3){
-                            $jyuntu_anko_ari = 0;
-                        }
-                    }
-                    $cnt++;
-                }
-            }else{
-                //筒子の対子なし
-                $pinzu_jyuntu_cnt = $this->jyuntu_only($hai_data,"pinzu");
-            }
-            //索子の対子をカウント
-            $toitu = 0;
-            for($i = 9;$i <= 15;$i++){
-                $toitu_umu = array_keys($hai_data, $i);
-                if(count($toitu_umu) == 2){
-                    $toitu = $toitu + 1;
-                }
-            }
-            if(($anko_count + $pinzu_jyuntu_cnt + $sozu_jyuntu_cnt) == 4){
-
-            }
-        }else{
-            //順子のみ
-            $jyuntu_cnt = $this->jyuntu_only($hai_data,"pinzu_sozu");
-            if($jyuntu_cnt == 4){
-                $result = "tenpai";
-            }
+        if($this->syanten_normal == 0){
+            $result = "tenpai";
         }
-        Log::debug($anko_count);
+        if($this->syanten_normal == -1){
+            $result = "agari";
+        }
         return $result;
     }
-    public function kokusicheck($player_hai_data) 
+    public function mentu_cut1($i)
+    {
+        //※字牌のコーツは完全コーツ処理で抜いているの数牌だけで良い
+        for($j = $i;$j < 18;$j++){
+            //コーツ抜き出し
+            if(isset($this->tempTehai[$j])){
+                if($this->tempTehai[$j] >= 3){
+                    $this->mentsu_suu++;
+                    $this->koutsu_suu++;
+                    $this->tempTehai[$j]-=3;
+                    $this->mentu_cut1($j);
+                    $this->tempTehai[$j]+=3;
+                    $this->koutsu_suu--;
+                }
+            }
+            //シュンツ抜き出し
+            if(isset($this->tempTehai[$j]) && isset($this->tempTehai[$j+1]) && isset($this->tempTehai[$j+2])){
+                if($this->tempTehai[$j] && $this->tempTehai[$j+1] && $this->tempTehai[$j+2] && $j < 16){
+                    $this->shuntsu_suu++;
+                    $this->tempTehai[$j]--;
+                    $this->tempTehai[$j+1]--;
+                    $this->tempTehai[$j+2]--;
+                    $this->mentu_cut1($j);//自身を呼び出す
+                    $this->tempTehai[$j]++;
+                    $this->tempTehai[$j+1]++;
+                    $this->tempTehai[$j+2]++;
+                    $this->shuntsu_suu--;
+                }
+            }
+        }
+        $this->taatu_cut(1);//ターツ抜きへ
+        return;
+    }
+    public function taatu_cut($i)
+    {
+        for($j = $i;$j < 27;$j++){
+            $this->mentsu_suu = $this->kanzen_koutsu_suu + $this->koutsu_suu + $this->kanzen_shuntsu_suu + $this->shuntsu_suu;
+    
+            if($this->mentsu_suu + $this->taatsu_suu < 4){//メンツとターツの合計は4まで
+                //トイツ抜き出し
+                if(isset($this->tempTehai[$j])){
+                    if($this->tempTehai[$j]==2){
+                        $this->taatsu_suu++;
+                        $this->tempTehai[$j]-=2;
+                        $this->taatu_cut($j);
+                        $this->tempTehai[$j]+=2;
+                        $this->taatsu_suu--;
+                    }
+                }
+                //todo　$j%10 < 9の式が怪しい
+                //リャンメン・ペンチャン抜き出し
+                if(isset($this->tempTehai[$j]) && isset($this->tempTehai[$j+1])){
+                    if($this->tempTehai[$j] && $this->tempTehai[$j+1] && $j < 16 && $j%10 < 9){
+                        $this->taatsu_suu++;
+                        $this->tempTehai[$j]--;
+                        $this->tempTehai[$j+1]--;
+                        $this->taatu_cut($j);
+                        $this->tempTehai[$j]++;
+                        $this->tempTehai[$j+1]++;
+                        $this->taatsu_suu--;
+                    }
+                }
+    
+                //カンチャン抜き出し
+                if(isset($this->tempTehai[$j]) && isset($this->tempTehai[$j+1]) && isset($this->tempTehai[$j+2])){
+                    if($this->tempTehai[$j]&&!$this->tempTehai[$j+1] && $this->tempTehai[$j+2] && $j< 16 && $j%10<8){
+                        $this->taatsu_suu++;
+                        $this->tempTehai[$j]--;
+                        $this->tempTehai[$j+2]--;
+                        $this->taatu_cut($j);
+                        $this->tempTehai[$j]++;
+                        $this->tempTehai[$j+2]++;
+                        $this->taatsu_suu--;
+                    }
+                }
+            }
+        }
+    
+        $this->syanten_temp=8-$this->mentsu_suu*2-$this->taatsu_suu-$this->toitsu_suu;
+        if($this->syanten_temp<$this->syanten_normal) {$this->syanten_normal=$this->syanten_temp;}
+        return;
+    }
+    public function kanzenkoutsucheck()
+    {
+        $kanzenkoutsu_suu = 0;
+
+        //字牌,萬子の完全コーツを抜き出す
+        for($i=18;$i<27;$i++){
+            if(isset($this->tempTehai[$i])){
+                if($this->tempTehai[$i] >= 3){
+                    $this->tempTehai[$i] -= 3;
+                    $kanzenkoutsu_suu++;
+                }
+            }
+        }
+    
+        //数牌の完全コーツを抜き出す
+        for($i = 0;$i < 16;$i+=9){
+            if(isset($this->tempTehai[$i])){
+                if($this->tempTehai[$i] >= 3 && !isset($this->tempTehai[$i+1]) && !isset($this->tempTehai[$i+2])){
+                    $this->tempTehai[$i]-=3;
+                    $kanzenkoutsu_suu++;
+                }
+            }
+            if(isset($this->tempTehai[$i+1])){
+                if(!isset($this->tempTehai[$i]) && $this->tempTehai[$i+1] >= 3 && !isset($this->tempTehai[$i+2]) && !isset($this->tempTehai[$i+4])){
+                    $this->tempTehai[$i+1]-=3;
+                    $kanzenkoutsu_suu++;
+                }
+            }
+            //3~7の完全コーツを抜く
+            for($j = 0;$j < 5;$j++){
+                if(isset($this->tempTehai[$i+$j+2])){
+                    if(!isset($this->tempTehai[$i+$j]) && !isset($this->tempTehai[$i+$j+1]) && $this->tempTehai[$i+$j+2] >= 3 && !isset($this->tempTehai[$i+$j+4]) && !isset($this->tempTehai[$i+$j+5])){
+                        $this->tempTehai[$i+$j+2]-=3;
+                        $kanzenkoutsu_suu++;
+                    }
+                }
+            }
+            if(isset($this->tempTehai[$i+7])){
+                if(!isset($this->tempTehai[$i+5]) && !isset($this->tempTehai[$i+6]) && $this->tempTehai[$i+7] >= 3 && !isset($this->tempTehai[$i+9])){
+                    $this->tempTehai[$i+7]-=3;
+                    $kanzenkoutsu_suu++;
+                }
+            }
+            if(isset($this->tempTehai[$i+8])){
+                if(!isset($this->tempTehai[$i+6]) && !isset($this->tempTehai[$i+7]) && $this->tempTehai[$i+8] >= 3){
+                    $this->tempTehai[$i+8]-=3;
+                    $kanzenkoutsu_suu++;
+                }
+            }
+        }
+        return $kanzenkoutsu_suu;
+    }
+    public function kanzenshuntsucheck()
+    {
+        $kanzenshuntsu_suu = 0;
+        //123,456のような完全に独立したシュンツを抜き出すための処理
+        for($i = 0;$i < 16;$i+=9){
+            //ピンズ→ソーズ
+            //123▲▲
+            if(isset($this->tempTehai[$i]) && isset($this->tempTehai[$i+1]) && isset($this->tempTehai[$i+2])){
+                if($this->tempTehai[$i]==2 && $this->tempTehai[$i+1]==2 && $this->tempTehai[$i+2]==2 && !isset($this->tempTehai[$i+3]) && !isset($this->tempTehai[$i+4])){
+                    $this->tempTehai[$i]-=2;
+                    $this->tempTehai[$i+1]-=2;
+                    $this->tempTehai[$i+2]-=2;
+                    $kanzenshuntsu_suu+=2;
+                }
+            }
+            //▲234▲▲
+            if(isset($this->tempTehai[$i+1]) && isset($this->tempTehai[$i+2]) && isset($this->tempTehai[$i+3])){
+                if(!isset($this->tempTehai[$i]) && $this->tempTehai[$i+1]==2 && $this->tempTehai[$i+2]==2 && $this->tempTehai[$i+3]==2 && !isset($this->tempTehai[$i+4]) && !isset($this->tempTehai[$i+5])){
+                    $this->tempTehai[$i+1]-=2;
+                    $this->tempTehai[$i+2]-=2;
+                    $this->tempTehai[$i+3]-=2;
+                    $kanzenshuntsu_suu+=2;
+                }
+            }
+            //▲▲345▲▲
+            if(isset($this->tempTehai[$i+2]) && isset($this->tempTehai[$i+3]) && isset($this->tempTehai[$i+4])){
+                if(isset($this->tempTehai[$i]) && !isset($this->tempTehai[$i+1]) && $this->tempTehai[$i+2]==2 && $this->tempTehai[$i+3]==2 && $this->tempTehai[$i+4]==2 && !isset($this->tempTehai[$i+5]) && !isset($this->tempTehai[$i+6])){
+                    $this->tempTehai[$i+2]-=2;
+                    $this->tempTehai[$i+3]-=2;
+                    $this->tempTehai[$i+4]-=2;
+                    $kanzenshuntsu_suu+=2;
+                }
+            }
+            //▲▲456▲▲
+            if(isset($this->tempTehai[$i+3]) && isset($this->tempTehai[$i+4]) && isset($this->tempTehai[$i+5])){
+                if(!isset($this->tempTehai[$i+1]) && !isset($this->tempTehai[$i+2]) && $this->tempTehai[$i+3]==2 && $this->tempTehai[$i+4]==2 && $this->tempTehai[$i+5]==2 && !isset($this->tempTehai[$i+6]) && !isset($this->tempTehai[$i+7])){
+                    $this->tempTehai[$i+3]-=2;
+                    $this->tempTehai[$i+4]-=2;
+                    $this->tempTehai[$i+5]-=2;
+                    $kanzenshuntsu_suu+=2;
+                }
+            }
+            //▲▲567▲▲
+            if(isset($this->tempTehai[$i+4]) && isset($this->tempTehai[$i+5]) && isset($this->tempTehai[$i+6])){
+                if(!isset($this->tempTehai[$i+2]) && !isset($this->tempTehai[$i+3]) && $this->tempTehai[$i+4]==2 && $this->tempTehai[$i+5]==2 && $this->tempTehai[$i+6]==2 && !isset($this->tempTehai[$i+7]) && !isset($this->tempTehai[$i+8])){
+                    $this->tempTehai[$i+4]-=2;
+                    $this->tempTehai[$i+5]-=2;
+                    $this->tempTehai[$i+6]-=2;
+                    $kanzenshuntsu_suu+=2;
+                }
+            }
+            //▲▲678▲
+            if(isset($this->tempTehai[$i+5]) && isset($this->tempTehai[$i+6]) && isset($this->tempTehai[$i+7])){
+                if(!isset($this->tempTehai[$i+3]) && !isset($this->tempTehai[$i+4]) && $this->tempTehai[$i+5]==2 && $this->tempTehai[$i+6]==2 && $this->tempTehai[$i+7]==2 && !isset($this->tempTehai[$i+8])){
+                    $this->tempTehai[$i+5]-=2;
+                    $this->tempTehai[$i+6]-=2;
+                    $this->tempTehai[$i+7]-=2;
+                    $kanzenshuntsu_suu+=2;
+                }
+            }
+            //▲▲789
+            if(isset($this->tempTehai[$i+6]) && isset($this->tempTehai[$i+7]) && isset($this->tempTehai[$i+8])){
+                if(!isset($this->tempTehai[$i+4]) && !isset($this->tempTehai[$i+5]) && $this->tempTehai[$i+6]==2 && $this->tempTehai[$i+7]==2 && $this->tempTehai[$i+8]==2){
+                    $this->tempTehai[$i+6]-=2;
+                    $this->tempTehai[$i+7]-=2;
+                    $this->tempTehai[$i+8]-=2;
+                    $kanzenshuntsu_suu+=2;
+                }
+            }
+        }
+
+
+        for($i = 0;$i < 16;$i+=9){
+            //ピンズ→ソーズ
+            //123▲▲
+            if(isset($this->tempTehai[$i]) && isset($this->tempTehai[$i+1]) && isset($this->tempTehai[$i+2])){
+                if($this->tempTehai[$i]==1 && $this->tempTehai[$i+1]==1 && $this->tempTehai[$i+2]==1 && !isset($this->tempTehai[$i+3]) && !isset($this->tempTehai[$i+4])){
+                    $this->tempTehai[$i]--;
+                    $this->tempTehai[$i+1]--;
+                    $this->tempTehai[$i+2]--;
+                    $kanzenshuntsu_suu++;
+                }
+            }
+            //▲234▲▲
+            if(isset($this->tempTehai[$i+1]) && isset($this->tempTehai[$i+2]) && isset($this->tempTehai[$i+3])){
+                if(!isset($this->tempTehai[$i]) && $this->tempTehai[$i+1]==1 && $this->tempTehai[$i+2]==1 && $this->tempTehai[$i+3]==1 && !isset($this->tempTehai[$i+4]) && !isset($this->tempTehai[$i+5])){
+                    $this->tempTehai[$i+1]--;
+                    $this->tempTehai[$i+2]--;
+                    $this->tempTehai[$i+3]--;
+                    $kanzenshuntsu_suu++;
+                }
+            }
+            //▲▲345▲▲
+            if(isset($this->tempTehai[$i+2]) && isset($this->tempTehai[$i+3]) && isset($this->tempTehai[$i+4])){
+                if(!isset($this->tempTehai[$i]) && !isset($this->tempTehai[$i+1]) && $this->tempTehai[$i+2]==1 && $this->tempTehai[$i+3]==1 && $this->tempTehai[$i+4]==1 && !isset($this->tempTehai[$i+5]) && !isset($this->tempTehai[$i+6])){
+                    $this->tempTehai[$i+2]--;
+                    $this->tempTehai[$i+3]--;
+                    $this->tempTehai[$i+4]--;
+                    $kanzenshuntsu_suu++;
+                }
+            }
+            //▲▲456▲▲
+            if(isset($this->tempTehai[$i+3]) && isset($this->tempTehai[$i+4]) && isset($this->tempTehai[$i+5])){
+                if(!isset($this->tempTehai[$i+1]) && !isset($this->tempTehai[$i+2]) && $this->tempTehai[$i+3]==1 && $this->tempTehai[$i+4]==1 && $this->tempTehai[$i+5]==1 && !isset($this->tempTehai[$i+6]) && !isset($this->tempTehai[$i+7])){
+                    $this->tempTehai[$i+3]--;
+                    $this->tempTehai[$i+4]--;
+                    $this->tempTehai[$i+5]--;
+                    $kanzenshuntsu_suu++;
+                }
+            }
+            //▲▲567▲▲
+            if(isset($this->tempTehai[$i+4]) && isset($this->tempTehai[$i+5]) && isset($this->tempTehai[$i+6])){
+                if(!isset($this->tempTehai[$i+2]) && !isset($this->tempTehai[$i+3]) && $this->tempTehai[$i+4]==1 && $this->tempTehai[$i+5]==1 && $this->tempTehai[$i+6]==1 && !isset($this->tempTehai[$i+7]) && !isset($this->tempTehai[$i+8])){
+                    $this->tempTehai[$i+4]--;
+                    $this->tempTehai[$i+5]--;
+                    $this->tempTehai[$i+6]--;
+                    $kanzenshuntsu_suu++;
+                }
+            }
+            //▲▲678▲
+            if(isset($this->tempTehai[$i+5]) && isset($this->tempTehai[$i+6]) && isset($this->tempTehai[$i+7])){
+                if(!isset($this->tempTehai[$i+3]) && !isset($this->tempTehai[$i+4]) && $this->tempTehai[$i+5]==1 && $this->tempTehai[$i+6]==1 && $this->tempTehai[$i+7]==1 && !isset($this->tempTehai[$i+8])){
+                    $this->tempTehai[$i+5]--;
+                    $this->tempTehai[$i+6]--;
+                    $this->tempTehai[$i+7]--;
+                    $kanzenshuntsu_suu++;
+                }
+            }
+            //▲▲789
+            if(isset($this->tempTehai[$i+6]) && isset($this->tempTehai[$i+7]) && isset($this->tempTehai[$i+8])){
+                if(!isset($this->tempTehai[$i+4]) && !isset($this->tempTehai[$i+5]) && $this->tempTehai[$i+6]==1 && $this->tempTehai[$i+7]==1 && $this->tempTehai[$i+8]==1){
+                    $this->tempTehai[$i+6]--;
+                    $this->tempTehai[$i+7]--;
+                    $this->tempTehai[$i+8]--;
+                    $kanzenshuntsu_suu++;
+                }
+            }
+        }
+        return $kanzenshuntsu_suu;
+    }
+    public function kokusicheck($p_hai) 
     {
         $kokusi = 0;
         $mae_hai = "";
         $mae_mae_hai = "";
         $toitu = 0;
         $anko = 0;
-        $hai = explode(',',$player_hai_data);
+        $hai = explode(',',$p_hai);
         sort($hai);
         foreach($hai as $val){
             if($val == "1p"){$kokusi++;}
@@ -735,12 +996,73 @@ $hoge = array_count_values($hai_data);
             $mae_mae_hai = $mae_hai;
             $mae_hai = $val;
         }
+        $result = "";
         if(($anko == 0 && $toitu == 1 && $kokusi == 13) || ($anko == 0 && $toitu == 1 && $kokusi == 14) || ($anko == 0 && $toitu == 2 && $kokusi == 13) || ($anko == 0 && $toitu == 2 && $kokusi == 14) || ($anko == 0 && $toitu == 0 && $kokusi == 13)){
             $result = "tenpai";
-        }else{
-            $result = "";
+        }
+        if($anko == 0 && $toitu == 1 && $kokusi == 14){
+            $result = "agari";
         }
         return $result;
+    }
+    public function kanzenkoritsucheck() 
+    {
+        $kanzenkoritsu_suu = 0;
+        //萬子,字牌の完全孤立牌を抜き出す
+        for($i = 18;$i < 25;$i++){
+            if(isset($this->tempTehai[$i])){
+                if($this->tempTehai[$i] == 1){
+                    //koritsu = i ;//孤立牌を変数に格納する
+                    $this->tempTehai[$i]--;
+                    $kanzenkoritsu_suu++;
+                }
+            }
+        }
+
+        //数牌の完全孤立牌を抜き出す
+        for($i = 0;$i < 16;$i=$i+9){
+            //ピンズ→ソーズ
+            //1の孤立牌を抜く
+            if(isset($this->tempTehai[$i])){
+                if($this->tempTehai[$i]==1 && !isset($this->tempTehai[$i+1]) && !isset($this->tempTehai[$i+2])){
+                    //koritsu = i+1;//孤立牌を変数に格納する
+                    $this->tempTehai[$i]--;
+                    $kanzenkoritsu_suu++;
+                }
+            }
+            //2の完全孤立牌を抜く
+            if(isset($this->tempTehai[$i+1])){
+                if(!isset($this->tempTehai[$i]) && $this->tempTehai[$i+1]==1 && !isset($this->tempTehai[$i+2]) && !isset($this->tempTehai[$i+3])){
+                    $this->tempTehai[$i+1]--;
+                    $kanzenkoritsu_suu++;
+                }
+            }
+            //3~7の完全孤立牌を抜く
+            for($j = 0;$j < 5;$j++){
+                if(isset($this->tempTehai[$i+$j+2])){
+                    if(!isset($this->tempTehai[$i+$j]) && !isset($this->tempTehai[$i+$j+1]) && $this->tempTehai[$i+$j+2]==1 && !isset($this->tempTehai[$i+$j+3]) && !isset($this->tempTehai[$i+$j+4])){
+                        $this->tempTehai[$i+$j+2]--;
+                        $kanzenkoritsu_suu++;
+                    }
+                }
+            }
+            //8の完全孤立牌を抜く
+            if(isset($this->tempTehai[$i+7])){
+                if(!isset($this->tempTehai[$i+5]) && !isset($this->tempTehai[$i+6]) && $this->tempTehai[$i+7]==1 && !isset($this->tempTehai[$i+8])){
+                    $this->tempTehai[$i+7]--;
+                    $kanzenkoritsu_suu++;
+                }
+            }
+            //9の完全孤立牌を抜く
+            if(isset($this->tempTehai[$i+8])){
+                if(!isset($this->tempTehai[$i+6]) && !isset($this->tempTehai[$i+7]) && $this->tempTehai[$i+8]==1){
+                    $this->tempTehai[$i+8]--;
+                    $kanzenkoritsu_suu++;
+                }
+            }
+        }
+
+        return $kanzenkoritsu_suu;
     }
     public function titoicheck($player_hai_data) 
     {
@@ -757,48 +1079,218 @@ $hoge = array_count_values($hai_data);
                 $mae_hai = $val;
             }
         }
+        $result = "";
         if($toitu == 6){
             $result = "tenpai";
+        }
+        if($toitu == 7){
+            $result = "agari";
+        }
+        return $result;
+    }
+    public function reach(Request $request)
+    {
+        $haipai = DB::table('haipai')->where('game_id',$request->session()->get('game_id'))->first();
+        $reach = "reach";
+        if($request->session()->get('player_no') == "player1"){
+            $p_reach = "player1_reach";
+            if($haipai->player1_sutehai == "" && $haipai->player2_nakihai == "" && $haipai->player3_nakihai == ""){
+                $reach = "wreach";
+            }
+        }
+        if($request->session()->get('player_no') == "player2"){
+            $p_reach = "player2_reach";
+            if($haipai->player2_sutehai == "" && $haipai->player1_nakihai == "" && $haipai->player3_nakihai == ""){
+                $reach = "wreach";
+            }
+        }
+        if($request->session()->get('player_no') == "player3"){
+            $p_reach = "player3_reach";
+            if($haipai->player3_sutehai == "" && $haipai->player1_nakihai == "" && $haipai->player2_nakihai == ""){
+                $reach = "wreach";
+            }
+        }
+        $result = DB::table('haipai')
+        ->where('game_id', $request->session()->get('game_id'))
+        ->update([
+            $p_reach => $reach,
+            'update_time' => Carbon::now()
+        ]);
+
+        if($result){
+            $res = ['result'=>'OK','message'=>'OK'];
+            $result = json_encode($res);
+            return $result;
+        }else{
+            $res = ['result'=>'NG','message'=>'NG'];
+            $result = json_encode($res);
+            return $result;
+        }
+    }
+    public function tumoagari(Request $request)
+    {
+        $game_status = DB::table('game_status')->where('id',$request->session()->get('game_id'))->first();
+        $haipai = DB::table('haipai')->where('game_id',$request->session()->get('game_id'))->first();
+        $tumohai = $request->session()->get('tumohai');
+        if($request->session()->get('player_no') == $game_status->oya_ban){
+            $oya_ban = "oya";
+        }else{
+            $oya_ban = "";
+        }
+        if($request->session()->get('player_no') == "player1"){
+            $player_hai = $haipai->player1_hai;
+            $player_nakihai = $haipai->player1_nakihai;
+            $player_reach = $haipai->player1_reach;
+        }
+        if($request->session()->get('player_no') == "player2"){
+            $player_hai = $haipai->player2_hai;
+            $player_nakihai = $haipai->player2_nakihai;
+            $player_reach = $haipai->player2_reach;
+            
+        }
+        if($request->session()->get('player_no') == "player3"){
+            $player_hai = $haipai->player3_hai;
+            $player_nakihai = $haipai->player3_nakihai;
+            $player_reach = $haipai->player3_reach;
+        }
+
+        if($player_nakihai != ""){
+            $p_nakihai = explode(',',$haipai->player_nakihai);
+            foreach($p_nakihai as $val){
+                if(substr($val, 2, 1) == "p"){
+                    $nakihai .= "," . substr($val, 3, 2) . "," . substr($val, 3, 2) . "," . substr($val, 3, 2);
+                }
+            }
+            $p_hai = $player_hai . "," . $tumohai . $nakihai;
+        }else{
+            $p_hai = $player_hai . "," . $tumohai;
+        }
+        $tenpai = "";
+        if($player_nakihai == ""){
+            $tempai = $this->titoicheck($p_hai);
+            if($tempai != "agari"){
+                $tempai = $this->kokusicheck($p_hai);
+            }
+            if($tempai != "agari"){
+                $tempai = $this->tenpaicheck($p_hai);
+            }
+        }
+
+        $yakucheck = $this->yakucheck($p_hai,$player_reach,$player_nakihai);
+        $tensucheck = $this->tensucheck($yakucheck,$oya_ban,"tumo");
+        if(count($tensucheck) !=0){
+            $res = ['result'=>'OK','message'=>$tensucheck];
+            $result = json_encode($res);
+            return $result;
+        }else{
+            $res = ['result'=>'NG','message'=>'NG'];
+            $result = json_encode($res);
+            return $result;
+        }
+    }
+    public function yakucheck($p_hai,$p_reach,$p_nakihai)
+    {
+        $yaku = array();
+        $yaku_ck = "";
+        if($p_reach == "reach" && $p_nakihai ==""){
+            $yaku[] = "reach"; 
+            $yaku_ck = $this->titoicheck($p_hai);
+            if($yaku_ck == "agari"){
+                $yaku[] = "titoi";
+            }
+            $yaku_ck = "";
+            $yaku_ck = $this->kokusicheck($p_hai);
+            if($yaku_ck == "agari"){
+                $yaku[] = "kokusi";
+            }
+            $yaku_ck = "";
+            $yaku_ck = $this->tanyao($p_hai);
+            if($yaku_ck == "tanyao"){
+                $yaku[] = "tanyao";
+            }
+        }
+        if($p_nakihai !=""){
+            $yaku_ck = "";
+            $yaku_ck = $this->tanyao($p_hai);
+            if($yaku_ck == "tanyao"){
+                $yaku[] = "tanyao";
+            }
+            $yaku_ck = "";
+            $yaku_ck = $this->toitoi($p_hai);
+            if($yaku_ck == "toitoi"){
+                $yaku[] = "toitoi";
+            }
+        }
+        return $yaku;
+    }
+    public function tensucheck($yakucheck,$oya_ban,$tumo)
+    {
+        $result = array();
+        if(count($yakucheck) == 0){
+            $result['notenpai'] = "-16000";
+        }else{
+            $yakuPoint = config('const.yakuPoint');
+            $hansu = 0;
+            foreach($yakucheck as $key=>$val){
+                $hansu = $hansu + $yakuPoint[$key];
+            }
+            if($oya_ban == ""){
+                //子
+            }else{
+                //親
+            }
+        }
+        return $result;
+    }
+    public function tanyao($p_hai) 
+    {
+        $not_tanyao = 0;
+        $hai = explode(',',$p_hai);
+        sort($hai);
+        foreach($hai as $val){
+            if($val == "1p"){$not_tanyao++;}
+            if($val == "9p"){$not_tanyao++;}
+            if($val == "1s"){$not_tanyao++;}
+            if($val == "9s"){$not_tanyao++;}
+            if($val == "1z"){$not_tanyao++;}
+            if($val == "2z"){$not_tanyao++;}
+            if($val == "3z"){$not_tanyao++;}
+            if($val == "4z"){$not_tanyao++;}
+            if($val == "5z"){$not_tanyao++;}
+            if($val == "6z"){$not_tanyao++;}
+            if($val == "7z"){$not_tanyao++;}
+            if($val == "1m"){$not_tanyao++;}
+            if($val == "9m"){$not_tanyao++;}
+        }
+        $result = "";
+        if($not_tanyao == 0){
+            $result = "tanyao";
         }else{
             $result = "";
         }
         return $result;
     }
-    public function jyuntu_only($hai_data,$pinzu_sozu) 
+    public function toitoi($player_hai_data) 
     {
-        $cnt = 0;
-        $jyuntu_cnt = 0;
-        $jyuntu_ari = 0;
-        foreach($hai_data as $val){
-            //対子が無いのが前提で123,234,345,456,567,678,789の組み合わせがあればカウント
-            if($cnt == 0 || $jyuntu_ari == 0){
-                if($pinzu_sozu == "pinzu_sozu" || $pinzu_sozu == "pinzu"){
-                    //筒子の順子をカウント
-                    for($i = 0;$i <= 6;$i++){
-                        if($hai_data[$cnt] == $i && $hai_data[$cnt + 1] == $i + 1 && $hai_data[$cnt + 2] == $i + 2){
-                            $jyuntu_cnt++;
-                            $jyuntu_ari++;
-                        }
-                    }
-                }
-                if($pinzu_sozu == "pinzu_sozu" || $pinzu_sozu == "sozu"){
-                    //索子の順子をカウント
-                    for($i = 9;$i <= 15;$i++){
-                        if($hai_data[$cnt] == $i && $hai_data[$cnt + 1] == $i + 1 && $hai_data[$cnt + 2] == $i + 2){
-                            $jyuntu_cnt++;
-                            $jyuntu_ari++;
-                        }
-                    }
-                }
-            }else{
-                //順子があれば該当牌の以降2牌はカウントの判定を行わない
-                $jyuntu_ari++;
-                if($jyuntu_ari == 3){
-                    $jyuntu_ari = 0;
-                }
-            }
-            $cnt++;
+        $phai = $this->seiretu($player_hai_data);
+        $hai = explode(',',$phai);
+        $hainom = config('const.haiNom');
+        $hai_data = array();
+        foreach($hai as $val){
+            $hai_data[] = $hainom[$val];
         }
-        return $jyuntu_cnt;
+        $hai_arr = array_count_values($hai_data);
+        $anko_cnt = 0;
+        foreach($hai_arr as $val){
+            if($val > 2){
+                $anko_cnt++;
+            }
+        }
+        if($anko_cnt == 4){
+            $result = "toitoi";
+        }else{
+            $result = "";
+        }
+        return $result;
     }
 }

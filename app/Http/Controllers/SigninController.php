@@ -11,10 +11,6 @@ class SigninController extends Controller
     {
         $errors = '';
         $users = DB::table('users')->get();
-        Log::debug($users);
-//        $hoge=config('const.paiYama');
-//        $hoge1=shuffle($hoge);
-//        Log::debug($hoge);
         return view('signin', compact('errors'));
     }
     public function logincheck (Request $request) 

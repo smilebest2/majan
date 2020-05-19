@@ -7,7 +7,9 @@
         <title>majan</title>
         <link rel="stylesheet" href="{{ asset('/css/test.css') }}">
         <link rel="stylesheet" href="{{ asset('/css/scss.css') }}">
+        <link rel="stylesheet" href="{{ asset('js/jquery-ui-1.12.1/jquery-ui.css') }}">
         <script src="{{asset('/js/jquery-3.5.0.min.js')}}"></script>
+        <script src="{{ asset('js/jquery-ui-1.12.1/jquery-ui.min.js') }}"></script>
         <script>
         $(document).ready(function(){
             var ck_flg = "";
@@ -16,6 +18,8 @@
             var select_id = "";
             var path = "";
             var ponkan = "";
+            var reach = "";
+            var reach_flg = "";
             var nakihai_disp = "";
             var update_time = "{{$haipai->update_time}}";
             var player = "{{Session::get('player_no')}}";
@@ -70,7 +74,7 @@
                 });
                 $(select).on('click', function() {
                     if($('#tehai_tumo').attr('value') != "0h" || ponkan == "ponkan"){
-                        if(ck_flg == "tumo_ban" && click_ck == ""){
+                        if(ck_flg == "tumo_ban" && click_ck == "" && reach_flg == ""){
                             click_ck = "click";
                             var id = "#" + $(this).attr('id');
                             var sutehai = $(id).attr('value');
@@ -83,7 +87,7 @@
                             $.ajax({
                                 url: "{{ action('TestController@sutehai') }}",
                                 type: 'POST',
-                                data:{'sutehai':sutehai,'tumohai':tumohai,'ponkan':ponkan},
+                                data:{'sutehai':sutehai,'tumohai':tumohai,'ponkan':ponkan,'reach':reach},
                                 dataType:'json'
                             })
                             // Ajaxリクエストが成功した場合
@@ -92,10 +96,13 @@
                                     $('#tehai_tumo').hide();
                                     $('#reach_span').hide();
                                     disp_tehai_sutehai(data);
+                                    $('#tumoagari_span').hide();
+                                    $('#lon_span').show();
                                 }
                                 ck_flg = "";
                                 click_ck = "";
                                 ponkan = "";
+                                reach = "";
                             })
                             // Ajaxリクエストが失敗した場合
                             .fail(function(data) {
@@ -176,13 +183,13 @@
                 }
                 if(data.message.player2_nakihai != ""){
                     if(player == "player1"){
-                        disp_nakihai(data.message.player2_nakihai.split(','),data.message.player2_hai,"kamitya");
+                        disp_nakihai(data.message.player2_nakihai.split(','),data.message.player2_hai,"simotya");
                     }
                     if(player == "player2" && data.message.player2_nakihai.length != 0){
                         disp_nakihai(data.message.player2_nakihai.split(','),0,"ji");
                     }
                     if(player == "player3"){
-                        disp_nakihai(data.message.player2_nakihai.split(','),data.message.player2_hai,"simotya");
+                        disp_nakihai(data.message.player2_nakihai.split(','),data.message.player2_hai,"kamitya");
                     }
                 }
                 if(data.message.player3_nakihai != ""){
@@ -254,17 +261,40 @@
                 for(var i=0; i < hai_arr.length; i++){
                     select_id = hai_disp + i;
                     path = $(select_id).attr('src').slice(0,-6);
-                    new_path = path + hai_arr[i] + ".png";
+                    var hai_value = "";
+                    if(hai_arr[i].length == 3){
+                        hai_value = hai_arr[i].substr(1,2);
+                    }else{
+                        hai_value = hai_arr[i];
+                    }
+                    new_path = path + hai_value + ".png";
                     $(select_id).attr('src', new_path);
                     if(tehai != ""){
-                        $(select_id).attr('value', hai_arr[i]);
+                        $(select_id).attr('value', hai_value);
+                    }
+                    if(hai_arr[i].length == 3){
+                        if(hai_disp =="#kamitya_sutehai_"){
+                            $(select_id).addClass("rotate1");
+                            $('#reach_kamitya_span').show();
+                        }
+                        if(hai_disp == "#simotya_sutehai_"){
+                            $(select_id).removeClass("rotate2");
+                            $('#reach_simotya_span').show();
+                        }
+                        if(hai_disp == "#toimen_sutehai_"){
+                            $(select_id).addClass("rotate2");
+                            $('#reach_toimen_span').show();
+                        }
+                        if(hai_disp =="#player_sutehai_"){
+                            $(select_id).addClass("rotate");
+                        }
                     }
                 }
                 if(pon != ""){
                     i = i- 1;
                     $(select_id).hide();
                     $('#tehai_tumo').attr('src', new_path);
-                    $('#tehai_tumo').attr('value', hai_arr[i]);
+                    $('#tehai_tumo').attr('value', hai_value);
                     $('#tehai_tumo').show();
                     for(var cnt = i; cnt < 13; cnt++){
                         select_id = hai_disp + cnt;
@@ -325,7 +355,7 @@
                     $.ajax({
                         url: "{{ action('TestController@sutehai') }}",
                         type: 'POST',
-                        data:{'sutehai':sutehai,'tumohai':tumohai,'ponkan':ponkan},
+                        data:{'sutehai':sutehai,'tumohai':tumohai,'ponkan':ponkan,'reach':reach},
                         dataType:'json'
                     })
                     // Ajaxリクエストが成功した場合
@@ -335,7 +365,10 @@
                             $('#tehai_tumo').hide();
                             $('#reach_span').hide();
                             disp_tehai_sutehai(data);
+                            $('#tumoagari_span').hide();
+                            $('#lon_span').show();
                             ck_flg = "";
+                            reach = "";
                         }
                         click_ck = "";
                         ponkan = "";
@@ -351,6 +384,7 @@
                 if(click_ck == ""){
                     $('#pon_span').hide();
                     click_ck = "click";
+
                     $.ajaxSetup({
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -368,8 +402,15 @@
                             new_path = path + data.message + ".png";
                             $('#tehai_tumo').attr('src', new_path);
                             $('#tehai_tumo').attr('value', data.message);
-                            $('#reach_span').show();
-
+                            if(data.tenpai == "tenpai"){
+                                if(data.reach ==""){
+                                    $('#reach_span').show();
+                                }else{
+                                    reach_flg ="reach";
+                                }
+                            }
+                            $('#tumoagari_span').show();
+                            $('#lon_span').hide();
                             $('#tehai_tumo').show();
                             $('#tehai_tumo').hover(function() {
                                 //マウスを乗せたら色が変わる
@@ -384,7 +425,6 @@
                             $('#tumo_span').hide();
                             ck_flg = "tumo_ban";
                             click_ck = "";
-                            
                     })
                     // Ajaxリクエストが失敗した場合
                     .fail(function(data) {
@@ -436,6 +476,76 @@
                         click_ck = "";
                     });
                 }
+            });
+            $('#reach').on('click', function(){
+                if(click_ck == ""){
+                    $('#reach_sengen_span').show();
+                    click_ck = "click";
+                    setTimeout(function(){
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        });
+                        $.ajax({
+                            url: "{{ action('TestController@reach') }}",
+                            type: 'POST',
+                            dataType:'json'
+                        })
+                        // Ajaxリクエストが成功した場合
+                        .done(function(data) {
+                            if (data.result == "OK") {
+                                reach = "reach";
+                                $('#reach_span').hide();
+                            }
+                            click_ck = "";
+                        })
+                        // Ajaxリクエストが失敗した場合
+                        .fail(function(data) {
+                            alert("接続失敗");
+                            click_ck = "";
+                        });
+                    },2000);
+                }
+            });
+            $('#tumoagari').on('click', function() {
+                if(click_ck == ""){
+                    click_ck = "click";
+                    $.ajaxSetup({
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        }
+                    });
+                    $.ajax({
+                        url: "{{ action('TestController@tumoagari') }}",
+                        type: 'POST',
+                        dataType:'json'
+                    })
+                    // Ajaxリクエストが成功した場合
+                    .done(function(data) {
+                        if (data.result == "OK") {
+                            for(key in data.message){
+                                $('#yaku_1').text(key);
+                                $('#han_1').text(data.message[key]);
+                            }
+                            $('.js-modal').fadeIn();
+                        }
+                        click_ck = "";
+                    })
+                    // Ajaxリクエストが失敗した場合
+                    .fail(function(data) {
+                        alert("接続失敗");
+                        click_ck = "";
+                    });
+                }
+            });
+            $('.js-modal-open').on('click',function(){
+                $('.js-modal').fadeIn();
+                return false;
+            });
+            $('.js-modal-close').on('click',function(){
+                $('.js-modal').fadeOut();
+                return false;
             });
         });
         </script>
@@ -643,9 +753,34 @@
                     $dorayama = "<td><img src= " . $img_path . "></td><td><img src= " . $img_path . "></td><td><img src= " . $dora_path . "></td><td><img src= " . $dora_path1 . "></td><td><img src= " . $dora_path2 . "></td><td><img src= " . $dora_path3 . "></td><td><img src= " . $dora_path4 . "></td><td><img src= " . $dora_path5 . "></td>";
                 }
             ?>
-            <font color="#ff9999"><span id ="ba">{{$ba}}</span>&nbsp;<span id ="kyoku">{{$kyoku[1]}}</span>局&nbsp;&nbsp;<span id ="honba">{{$kyoku[2]}}</span>本場</font><br>
-            <font color="#ff9999">残り牌<span id ="nokori_hai">{{count($nokori)}}</span></font><br>
-            <?php echo $dorayama; ?> 
+            <div class="sicro_in1">
+                <font color="#ff9999"><span id ="ba">{{$ba}}</span>&nbsp;<span id ="kyoku">{{$kyoku[1]}}</span>局&nbsp;&nbsp;<span id ="honba">{{$kyoku[2]}}</span>本場</font><br>
+                <font color="#ff9999">残り牌<span id ="nokori_hai">{{count($nokori)}}</span></font><br>
+                <?php echo $dorayama; ?>
+            </div>
+            <div class="sicro_in2">
+            <?php
+                $img_path= asset("/img/reach.png");
+                echo "<span id=\"reach_toimen_span\" style=\"display:none;\"><div id=\"reach_toimen\"><img class=\"rotate2\" style=\"margin:-30px;\" src=" . $img_path . " ></div></span>";            ?>
+            </div>
+            <div class="sicro_in3">
+            <?php
+                $img_path= asset("/img/reach.png");
+                echo "<br><span id=\"reach_kamitya_span\" style=\"display:none;\"><div id=\"reach_simotya\"><img src=" . $img_path . " ></div></span>";
+            ?>
+            </div>
+            <div class="sicro_in4"></div>
+            <div class="sicro_in5">
+            <?php
+                $img_path= asset("/img/reach.png");
+                echo "<br><span id=\"reach_simotya_span\" style=\"display:none;\"><div id=\"reach_simotya\"><img src=" . $img_path . " ></div></span>";
+            ?>
+            </div>
+            <div class="sicro_in2">
+            <?php
+                $img_path= asset("/img/reach.png");
+                echo "<span id=\"reach_sengen_span\" style=\"display:none;\"><div id=\"reach_sengen\"><img class=\"rotate2\" style=\"margin:-30px;\" src=" . $img_path . " ></div></span>";
+            ?>
             </article>
             {{-- 下家捨て配 --}}
             <article class="c_side">
@@ -674,24 +809,18 @@
             {{-- プレイヤー捨て配 --}}
             <article class="c_footer">
                 <div>
-                    <table cellspacing="0">
                     <?php
                         $img_path= asset("/img/hai/0h.png");
-                        echo "<tr>";
                         for($i = 0;$i < 20;$i++){
                             $id = "id=\"player_sutehai_" . $i . "\""; 
-                            echo "<td><img " . $id . "src= " . $img_path . "></td>";
+                            echo "<img " . $id . "src= " . $img_path . ">";
                         }
-                        echo "</tr>";
-                        echo "<tr>";
                         for($i = 0;$i < 20;$i++){
                             $cnt = $i + 20;
                             $id = "id=\"player_sutehai_" . $cnt . "\""; 
-                            echo "<td><img " . $id . "src= " . $img_path . "></td>";
+                            echo "<img " . $id . "src= " . $img_path . ">";
                         }
-                        echo "</tr>";
                     ?>
-                    </table>
                 </div>
             </article>
         </article>
@@ -779,7 +908,6 @@
         ?>
         <span id="ji_naki"></span>
         <br><br>
-
         <span id="tumo_span" style="display:none;"><button id="tumo" type="button">ツモ</button></span>
         <span id="lon_span" style="display:none;"><button id="lon" type="button">ロン</button></span>
         <span id="pon_span" style="display:none;"><button id="pon" type="button">ポン</button></span>
@@ -787,5 +915,35 @@
         <span id="reach_span" style="display:none;"><button id="reach" type="button">リーチ</button></span>
         <span id="tumoagari_span" style="display:none;"><button id="tumoagari"" type="button">ツモ上がり</button></span>
         </footer>
+        <a class="js-modal-open" href="">クリックでモーダルを表示</a>
+        <div class="modal js-modal">
+		<div class="modal__bg js-modal-close"></div>
+		<div class="modal__content">
+            <img id="agari_0" src="http://localhost/majan/public/img/hai/3p.png">
+            <img id="agari_1" src="http://localhost/majan/public/img/hai/3p.png">
+            <img id="agari_2" src="http://localhost/majan/public/img/hai/3p.png">
+            <img id="agari_3" src="http://localhost/majan/public/img/hai/3p.png">
+            <img id="agari_4" src="http://localhost/majan/public/img/hai/3p.png">
+            <img id="agari_5" src="http://localhost/majan/public/img/hai/3p.png">
+            <img id="agari_6" src="http://localhost/majan/public/img/hai/3p.png">
+            <img id="agari_7" src="http://localhost/majan/public/img/hai/3p.png">
+            <img id="agari_9" src="http://localhost/majan/public/img/hai/3p.png">
+            <img id="agari_10" src="http://localhost/majan/public/img/hai/3p.png">
+            <img id="agari_11" src="http://localhost/majan/public/img/hai/3p.png">
+            <img id="agari_12" src="http://localhost/majan/public/img/hai/3p.png">
+            <img id="agari_13" src="http://localhost/majan/public/img/hai/3p.png">&nbsp;
+            <img id="agari_14" src="http://localhost/majan/public/img/hai/3p.png">
+            <table>
+                <td><p id="yaku_0">役</p></td>
+                <td><p id="han_0">飜</p></td>
+                <tr>
+                    <td><p id="yaku_1"></p></td>
+                    <td><p id="han_1"></p></td>
+                </td>
+            </table>
+            <p>ここにモーダルウィンドウで表示したいコンテンツを入れます。モーダルウィンドウを閉じる場合は下の「閉じる」をクリックするか、背景の黒い部分をクリックしても閉じることができます。</p>
+			<a class="js-modal-close" href="">閉じる</a>
+		</div><!--modal__inner-->
+	</div><!--modal-->
     </body>
 </html>
