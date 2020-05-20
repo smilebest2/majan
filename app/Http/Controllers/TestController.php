@@ -154,7 +154,7 @@ class TestController extends Controller
                         }
                     }
                 }
-                Log::debug();
+//                Log::debug();
                 $p_hai = $player_hai . "," . $tumohai . $nakihai;
             }else{
                 $p_hai = $player_hai . "," . $tumohai;
