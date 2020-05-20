@@ -135,10 +135,7 @@ class TestController extends Controller
                 $player_reach = $haipai->player3_reach;
             }
             if($player_nakihai != ""){
-Log::debug($player_nakihai);
                 if(strpos($player_nakihai, ',') == false){
-Log::debug("aaaa");
-Log::debug(substr($player_nakihai, 2, 1));
                     if(substr($player_nakihai, 1, 1) == "p"){
                         $nakihai = substr($player_nakihai, 2, 2) . "," . substr($player_nakihai, 2, 2) . "," . substr($player_nakihai, 2, 2);
                     }
@@ -146,7 +143,6 @@ Log::debug(substr($player_nakihai, 2, 1));
                         $nakihai = substr($player_nakihai, 2, 2) . "," . substr($player_nakihai, 2, 2) . "," . substr($player_nakihai, 2, 2) . "," . substr($val, 3, 2);
                     }
                 }else{
-Log::debug("bbbb");
                     $p_nakihai = explode(',',$player_nakihai);
                     foreach($p_nakihai as $val){
                         if(substr($val, 1, 1) == "p"){
@@ -157,18 +153,17 @@ Log::debug("bbbb");
                         }
                     }
                 }
-Log::debug($nakihai);
                 $p_hai = $player_hai . "," . $tumohai . $nakihai;
             }else{
                 $p_hai = $player_hai . "," . $tumohai;
             }
-            $p_hai = $player_hai . "," . $tumohai;
+
             $request->session()->put('tumohai', $tumohai);
 
             $tenpai = "";
             if($player_nakihai == ""){
                 $tenpai = "tenpai";
-/*
+/*  ツモ時のテンパイチェック処理は行わない。
                 $tempai = $this->titoicheck($p_hai);
                 if($tempai == ""){
                     $tempai = $this->kokusicheck($p_hai);
@@ -1168,16 +1163,29 @@ Log::debug($nakihai);
         }
 
         if($player_nakihai != ""){
-            $p_nakihai = explode(',',$haipai->player_nakihai);
-            foreach($p_nakihai as $val){
-                if(substr($val, 2, 1) == "p"){
-                    $nakihai .= "," . substr($val, 3, 2) . "," . substr($val, 3, 2) . "," . substr($val, 3, 2);
+            if(strpos($player_nakihai, ',') == false){
+                if(substr($player_nakihai, 1, 1) == "p"){
+                    $nakihai = substr($player_nakihai, 2, 2) . "," . substr($player_nakihai, 2, 2) . "," . substr($player_nakihai, 2, 2);
+                }
+                if(substr($player_nakihai, 1, 1) == "k"){
+                    $nakihai = substr($player_nakihai, 2, 2) . "," . substr($player_nakihai, 2, 2) . "," . substr($player_nakihai, 2, 2) . "," . substr($val, 3, 2);
+                }
+            }else{
+                $p_nakihai = explode(',',$player_nakihai);
+                foreach($p_nakihai as $val){
+                    if(substr($val, 1, 1) == "p"){
+                        $nakihai .= "," . substr($val, 2, 2) . "," . substr($val, 2, 2) . "," . substr($val, 2, 2);
+                    }
+                    if(substr($val, 1, 1) == "k"){
+                        $nakihai .= "," . substr($val, 2, 2) . "," . substr($val, 2, 2) . "," . substr($val, 2, 2) . "," . substr($val, 2, 2);
+                    }
                 }
             }
             $p_hai = $player_hai . "," . $tumohai . $nakihai;
         }else{
             $p_hai = $player_hai . "," . $tumohai;
         }
+
         $tenpai = "";
         if($player_nakihai == ""){
             $tempai = $this->titoicheck($p_hai);
