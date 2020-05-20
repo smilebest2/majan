@@ -138,10 +138,10 @@ class TestController extends Controller
                 if(strpos($player_nakihai, ',') == false){
                     $p_nakihai = $player_nakihai;
                     if(substr($p_nakihai, 2, 1) == "p"){
-                        $nakihai = substr($val, 3, 2) . "," . substr($val, 3, 2) . "," . substr($val, 3, 2);
+                        $nakihai = substr($p_nakihai, 3, 2) . "," . substr($p_nakihai, 3, 2) . "," . substr($p_nakihai, 3, 2);
                     }
                     if(substr($p_nakihai, 2, 1) == "k"){
-                        $nakihai = substr($val, 3, 2) . "," . substr($val, 3, 2) . "," . substr($val, 3, 2) . "," . substr($val, 3, 2);
+                        $nakihai = substr($p_nakihai, 3, 2) . "," . substr($p_nakihai, 3, 2) . "," . substr($p_nakihai, 3, 2) . "," . substr($val, 3, 2);
                     }
                 }else{
                     $p_nakihai = explode(',',$player_nakihai);
@@ -154,6 +154,7 @@ class TestController extends Controller
                         }
                     }
                 }
+                Log::debug();
                 $p_hai = $player_hai . "," . $tumohai . $nakihai;
             }else{
                 $p_hai = $player_hai . "," . $tumohai;
