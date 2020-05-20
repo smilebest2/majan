@@ -139,21 +139,21 @@ Log::debug($player_nakihai);
                 if(strpos($player_nakihai, ',') == false){
 Log::debug("aaaa");
 Log::debug(substr($player_nakihai, 2, 1));
-                    if(substr($player_nakihai, 2, 1) == "p"){
-                        $nakihai = substr($player_nakihai, 3, 2) . "," . substr($player_nakihai, 3, 2) . "," . substr($player_nakihai, 3, 2);
+                    if(substr($player_nakihai, 1, 1) == "p"){
+                        $nakihai = substr($player_nakihai, 2, 2) . "," . substr($player_nakihai, 2, 2) . "," . substr($player_nakihai, 2, 2);
                     }
-                    if(substr($player_nakihai, 2, 1) == "k"){
-                        $nakihai = substr($player_nakihai, 3, 2) . "," . substr($player_nakihai, 3, 2) . "," . substr($player_nakihai, 3, 2) . "," . substr($val, 3, 2);
+                    if(substr($player_nakihai, 1, 1) == "k"){
+                        $nakihai = substr($player_nakihai, 2, 2) . "," . substr($player_nakihai, 2, 2) . "," . substr($player_nakihai, 2, 2) . "," . substr($val, 3, 2);
                     }
                 }else{
 Log::debug("bbbb");
                     $p_nakihai = explode(',',$player_nakihai);
                     foreach($p_nakihai as $val){
-                        if(substr($val, 2, 1) == "p"){
-                            $nakihai .= "," . substr($val, 3, 2) . "," . substr($val, 3, 2) . "," . substr($val, 3, 2);
+                        if(substr($val, 1, 1) == "p"){
+                            $nakihai .= "," . substr($val, 2, 2) . "," . substr($val, 2, 2) . "," . substr($val, 2, 2);
                         }
-                        if(substr($val, 2, 1) == "k"){
-                            $nakihai .= "," . substr($val, 3, 2) . "," . substr($val, 3, 2) . "," . substr($val, 3, 2) . "," . substr($val, 3, 2);
+                        if(substr($val, 1, 1) == "k"){
+                            $nakihai .= "," . substr($val, 2, 2) . "," . substr($val, 2, 2) . "," . substr($val, 2, 2) . "," . substr($val, 2, 2);
                         }
                     }
                 }
