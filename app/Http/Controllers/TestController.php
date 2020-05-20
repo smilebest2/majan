@@ -135,15 +135,18 @@ class TestController extends Controller
                 $player_reach = $haipai->player3_reach;
             }
             if($player_nakihai != ""){
+Log::debug($player_nakihai);
                 if(strpos($player_nakihai, ',') == false){
-                    $p_nakihai = $player_nakihai;
-                    if(substr($p_nakihai, 2, 1) == "p"){
-                        $nakihai = substr($p_nakihai, 3, 2) . "," . substr($p_nakihai, 3, 2) . "," . substr($p_nakihai, 3, 2);
+Log::debug("aaaa");
+Log::debug(substr($player_nakihai, 2, 1));
+                    if(substr($player_nakihai, 2, 1) == "p"){
+                        $nakihai = substr($player_nakihai, 3, 2) . "," . substr($player_nakihai, 3, 2) . "," . substr($player_nakihai, 3, 2);
                     }
-                    if(substr($p_nakihai, 2, 1) == "k"){
-                        $nakihai = substr($p_nakihai, 3, 2) . "," . substr($p_nakihai, 3, 2) . "," . substr($p_nakihai, 3, 2) . "," . substr($val, 3, 2);
+                    if(substr($player_nakihai, 2, 1) == "k"){
+                        $nakihai = substr($player_nakihai, 3, 2) . "," . substr($player_nakihai, 3, 2) . "," . substr($player_nakihai, 3, 2) . "," . substr($val, 3, 2);
                     }
                 }else{
+Log::debug("bbbb");
                     $p_nakihai = explode(',',$player_nakihai);
                     foreach($p_nakihai as $val){
                         if(substr($val, 2, 1) == "p"){
@@ -154,7 +157,7 @@ class TestController extends Controller
                         }
                     }
                 }
-//                Log::debug();
+Log::debug($nakihai);
                 $p_hai = $player_hai . "," . $tumohai . $nakihai;
             }else{
                 $p_hai = $player_hai . "," . $tumohai;
