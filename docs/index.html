@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
     <meta name="theme-color" content="#073f34" />
-    <meta name="description" content="スマホで遊べる、CPU二人との三人麻雀一局戦。" />
+    <meta name="description" content="スマホの横画面で遊べる、CPU二人との三人麻雀半荘戦。" />
     <title>三麻ひとり打ち</title>
     <link rel="manifest" href="./manifest.json" />
     <link rel="stylesheet" href="./styles.css" />
@@ -13,16 +13,16 @@
     <main class="app" aria-label="三人麻雀ゲーム">
       <header class="topbar">
         <div>
-          <p class="eyebrow">ONE HAND · SANMA</p>
+          <p class="eyebrow">HALF GAME · SANMA</p>
           <h1>三麻ひとり打ち</h1>
         </div>
-        <button id="new-game" class="icon-button" type="button" aria-label="新しい対局">↻</button>
+        <button id="new-game" class="icon-button" type="button" aria-label="半荘を最初から">↻</button>
       </header>
 
       <section class="table" aria-live="polite">
         <div class="opponent opponent-left">
           <div class="player-card">
-            <span class="wind">南</span>
+            <span id="wind-1" class="wind">南</span>
             <span>CPU 青</span>
             <strong id="score-1">35,000</strong>
             <em id="nuki-1" class="nuki-count" hidden>北×0</em>
@@ -32,7 +32,7 @@
 
         <div class="opponent opponent-right">
           <div class="player-card">
-            <span class="wind">西</span>
+            <span id="wind-2" class="wind">西</span>
             <span>CPU 橙</span>
             <strong id="score-2">35,000</strong>
             <em id="nuki-2" class="nuki-count" hidden>北×0</em>
@@ -45,8 +45,8 @@
 
         <section class="center-panel">
           <div class="round-info">
-            <span class="round-mark">東一局</span>
-            <span>一局戦</span>
+            <span id="round-mark" class="round-mark">東一局</span>
+            <span id="round-sub">0本場</span>
           </div>
           <div class="dora-box">
             <span>ドラ表示</span>
@@ -68,7 +68,7 @@
           <button id="pass-action" class="action secondary" type="button" hidden>見送る</button>
         </div>
         <div class="self-info">
-          <span class="wind dealer">東</span>
+          <span id="wind-0" class="wind dealer">東</span>
           <span>あなた</span>
           <em id="nuki-0" class="nuki-count" hidden>北×0</em>
           <strong id="score-0">35,000</strong>
@@ -79,18 +79,22 @@
 
       <dialog id="result-dialog" class="result-dialog">
         <div class="result-mark" id="result-mark">和</div>
-        <p class="eyebrow">ONE HAND RESULT</p>
+        <p id="result-eyebrow" class="eyebrow">HAND RESULT</p>
         <h2 id="result-title">ツモ！</h2>
-        <p id="result-detail">見事な和了です</p>
+        <p id="result-detail">あなたの和了です</p>
         <div id="result-hand" class="result-hand"></div>
-        <button id="play-again" class="action primary wide" type="button">もう一局</button>
+        <div id="result-yaku" class="result-yaku"></div>
+        <div id="result-scores" class="result-scores"></div>
+        <button id="play-again" class="action primary wide" type="button">次の局</button>
       </dialog>
     </main>
+
     <aside class="rotate-notice" aria-label="画面回転のお願い">
       <div class="phone-icon" aria-hidden="true">↻</div>
       <strong>スマホを横向きにしてください</strong>
       <span>牌が大きく、卓全体が見やすくなります</span>
     </aside>
+    <script src="./scoring.js"></script>
     <script type="module" src="./game.js"></script>
   </body>
 </html>
