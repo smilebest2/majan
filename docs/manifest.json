@@ -1,0 +1,10 @@
+{
+  "name": "三麻ひとり打ち",
+  "short_name": "三麻",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#031f1b",
+  "theme_color": "#073f34",
+  "lang": "ja"
+}

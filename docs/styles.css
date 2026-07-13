@@ -19,6 +19,8 @@ body {
 
 button { font: inherit; }
 
+.rotate-notice { display: none; }
+
 .app {
   width: min(100%, 480px);
   min-height: 100dvh;
@@ -161,4 +163,161 @@ h1 { margin: 0; font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; font-si
 @media (min-width: 430px) {
   .river { grid-template-columns: repeat(6, 25px); }
   .river img { width: 25px; }
+}
+
+@media (orientation: landscape) {
+  body { overflow: hidden; }
+
+  .app {
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    min-height: 0;
+    grid-template-rows: 44px minmax(0, 1fr) 104px;
+  }
+
+  .topbar {
+    min-height: 44px;
+    padding: max(5px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 5px max(16px, env(safe-area-inset-left));
+  }
+
+  .topbar .eyebrow { display: none; }
+  h1 { font-size: 17px; }
+  .icon-button { width: 34px; height: 34px; font-size: 20px; }
+
+  .table {
+    min-height: 0;
+    border-width: 5px 10px;
+  }
+
+  .opponent { top: 8px; width: 28%; }
+  .opponent-left { left: 12px; }
+  .opponent-right { right: 12px; }
+  .player-card { font-size: 11px; }
+  .player-card strong { font-size: 12px; }
+  .hidden-hand { margin-top: 4px; }
+  .hidden-hand img { width: 24px; }
+
+  .river {
+    top: 50px;
+    grid-template-columns: repeat(6, 29px);
+    gap: 3px;
+    min-height: 0;
+  }
+  .river img { width: 29px; }
+  .river-left { left: 18px; }
+  .river-right { right: 18px; }
+  .river-player {
+    top: auto;
+    bottom: 7px;
+    left: 50%;
+    grid-template-columns: repeat(8, 29px);
+  }
+
+  .center-panel {
+    width: 106px;
+    height: 106px;
+    top: 47%;
+  }
+
+  .status {
+    width: 36%;
+    top: 8px;
+    bottom: auto;
+    font-size: 10px;
+    z-index: 2;
+  }
+
+  .controls {
+    position: relative;
+    padding: 2px max(13px, env(safe-area-inset-right)) max(4px, env(safe-area-inset-bottom)) max(13px, env(safe-area-inset-left));
+  }
+
+  .self-info {
+    position: absolute;
+    left: max(13px, env(safe-area-inset-left));
+    top: 5px;
+    width: 120px;
+    height: 23px;
+    z-index: 3;
+  }
+
+  .self-info strong { margin-left: 0; }
+
+  .hand {
+    min-height: 96px;
+    height: 96px;
+    padding-top: 14px;
+  }
+
+  .tile-button {
+    flex: 0 1 47px;
+    max-width: 47px;
+    height: 81px;
+  }
+
+  .tile-button img {
+    width: 46px;
+    max-width: 46px;
+    image-rendering: auto;
+  }
+
+  .tile-button.drawn { margin-left: 9px; }
+  .tile-button:active, .tile-button.selected { transform: translateY(-8px); }
+  .hint { display: none; }
+
+  .action-bar {
+    position: absolute;
+    right: max(14px, env(safe-area-inset-right));
+    top: 7px;
+    margin: 0;
+    z-index: 4;
+  }
+
+  .action { min-width: 82px; padding: 7px 14px; }
+}
+
+@media (orientation: landscape) and (max-height: 380px) {
+  .app { grid-template-rows: 38px minmax(0, 1fr) 92px; }
+  .topbar { min-height: 38px; }
+  .icon-button { width: 30px; height: 30px; }
+  .hand { height: 86px; min-height: 86px; padding-top: 10px; }
+  .tile-button { height: 74px; max-width: 43px; }
+  .tile-button img { width: 42px; max-width: 42px; }
+  .river { grid-template-columns: repeat(6, 26px); }
+  .river img { width: 26px; }
+  .river-player { grid-template-columns: repeat(8, 26px); }
+  .center-panel { width: 96px; height: 96px; }
+}
+
+@media (orientation: portrait) and (max-width: 767px) {
+  .rotate-notice {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 30px;
+    text-align: center;
+    background: radial-gradient(circle at 50% 35%, #17604e, #031b17 70%);
+    color: #f8f1df;
+  }
+
+  .rotate-notice strong { font-family: "Yu Mincho", serif; font-size: 20px; letter-spacing: .05em; }
+  .rotate-notice span { color: #b7cec5; font-size: 12px; }
+  .phone-icon {
+    width: 72px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 6px;
+    border: 3px solid #e7c35f;
+    border-radius: 10px;
+    color: #e7c35f;
+    font-size: 28px;
+    transform: rotate(-8deg);
+  }
 }

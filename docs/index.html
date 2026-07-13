@@ -6,6 +6,7 @@
     <meta name="theme-color" content="#073f34" />
     <meta name="description" content="スマホで遊べる、CPU二人との三人麻雀一局戦。" />
     <title>三麻ひとり打ち</title>
+    <link rel="manifest" href="./manifest.json" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -85,6 +86,11 @@
         <button id="play-again" class="action primary wide" type="button">もう一局</button>
       </dialog>
     </main>
+    <aside class="rotate-notice" aria-label="画面回転のお願い">
+      <div class="phone-icon" aria-hidden="true">↻</div>
+      <strong>スマホを横向きにしてください</strong>
+      <span>牌が大きく、卓全体が見やすくなります</span>
+    </aside>
     <script type="module" src="./game.js"></script>
   </body>
 </html>
