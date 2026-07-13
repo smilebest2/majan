@@ -10,12 +10,17 @@ const els = {
   actionBar: document.querySelector("#action-bar"),
   winAction: document.querySelector("#win-action"),
   passAction: document.querySelector("#pass-action"),
+  reachAction: document.querySelector("#reach-action"),
+  northAction: document.querySelector("#north-action"),
   dialog: document.querySelector("#result-dialog"),
   resultTitle: document.querySelector("#result-title"),
   resultDetail: document.querySelector("#result-detail"),
   resultMark: document.querySelector("#result-mark"),
   resultHand: document.querySelector("#result-hand"),
   cpuCounts: [document.querySelector("#cpu1-count"), document.querySelector("#cpu2-count")],
+  scores: [0, 1, 2].map((i) => document.querySelector(`#score-${i}`)),
+  nukiCounts: [0, 1, 2].map((i) => document.querySelector(`#nuki-${i}`)),
+  riichiSticks: document.querySelector("#riichi-sticks"),
 };
 
 let game;
@@ -74,6 +79,11 @@ function startGame() {
     pendingRonTile: null,
     over: false,
     busy: false,
+    points: [35000, 35000, 35000],
+    riichi: [false, false, false],
+    riichiSticks: 0,
+    declaringRiichi: false,
+    nuki: [0, 0, 0],
   };
 
   for (let round = 0; round < 13; round += 1) {
@@ -84,7 +94,7 @@ function startGame() {
   drawTile(0);
   setStatus("あなたの番です。牌を選んでください");
   render();
-  showTsumoIfAvailable();
+  refreshActions();
 }
 
 function drawTile(player) {
@@ -120,6 +130,7 @@ function resolveDiscard(player, tile) {
       game.pendingRonTile = tile;
       game.busy = false;
       els.winAction.textContent = "ロン";
+      els.winAction.hidden = false;
       els.passAction.hidden = false;
       els.actionBar.hidden = false;
       setStatus(`${player === 1 ? "CPU 青" : "CPU 橙"}の打牌にロンできます`);
@@ -144,7 +155,7 @@ function continueAfterDiscard(player) {
       if (next === 0) {
         game.busy = false;
         setStatus("ツモ和了できます");
-        showTsumoIfAvailable();
+        refreshActions();
       } else {
         timer = setTimeout(() => finishGame("ツモ", `${next === 1 ? "CPU 青" : "CPU 橙"}のツモ和了です`, game.hands[next], "和"), 500);
       }
@@ -156,7 +167,7 @@ function continueAfterDiscard(player) {
       renderHand();
       return;
     }
-    timer = setTimeout(() => cpuDiscard(next), 500);
+    timer = setTimeout(() => cpuNukiThenDiscard(next), 500);
   }, next === 0 ? 280 : 430);
 }
 
@@ -165,7 +176,18 @@ function cpuDiscard(player) {
   const hand = game.hands[player];
   let bestScore = -Infinity;
   let candidates = [];
-  for (const tile of hand) {
+  let pool = hand;
+  const riichiCandidates = !game.riichi[player] ? getRiichiDiscards(hand) : [];
+  if (riichiCandidates.length) {
+    game.riichi[player] = true;
+    game.points[player] -= 1000;
+    game.riichiSticks += 1;
+    pool = hand.filter((tile) => riichiCandidates.includes(tile.id));
+    setStatus(`${player === 1 ? "CPU 青" : "CPU 橙"}がリーチ！`);
+    render();
+  }
+  if (game.riichi[player] && game.drawnId) pool = hand.filter((tile) => tile.id === game.drawnId);
+  for (const tile of pool) {
     const remaining = hand.filter((item) => item.id !== tile.id);
     const score = handPotential(remaining);
     if (score > bestScore) {
@@ -176,6 +198,21 @@ function cpuDiscard(player) {
   const choice = candidates[Math.floor(Math.random() * candidates.length)];
   setStatus(`${player === 1 ? "CPU 青" : "CPU 橙"}が ${displayName(choice.code)} を打牌`);
   discard(player, choice.id);
+}
+
+function cpuNukiThenDiscard(player) {
+  const north = game.hands[player].find((tile) => canonical(tile.code) === "4z");
+  if (!north) { cpuDiscard(player); return; }
+  game.hands[player] = game.hands[player].filter((tile) => tile.id !== north.id);
+  game.nuki[player] += 1;
+  setStatus(`${player === 1 ? "CPU 青" : "CPU 橙"}が北を抜きました`);
+  if (!drawTile(player) || game.over) return;
+  render();
+  if (isWinning(game.hands[player])) {
+    timer = setTimeout(() => finishGame("ツモ", `${player === 1 ? "CPU 青" : "CPU 橙"}のツモ和了です`, game.hands[player], "和"), 400);
+    return;
+  }
+  timer = setTimeout(() => cpuNukiThenDiscard(player), 300);
 }
 
 function handPotential(hand) {
@@ -218,6 +255,17 @@ function isWinning(hand) {
   return false;
 }
 
+function isTenpai(hand) {
+  if (hand.length % 3 !== 1) return false;
+  const counts = toCounts(hand);
+  return TILE_TYPES.some((code, index) => counts[index] < 4 && isWinning([...hand, { id: -1, code }]));
+}
+
+function getRiichiDiscards(hand) {
+  if (hand.length % 3 !== 2) return [];
+  return hand.filter((tile) => isTenpai(hand.filter((item) => item.id !== tile.id))).map((tile) => tile.id);
+}
+
 function canFormMelds(counts) {
   const first = counts.findIndex((count) => count > 0);
   if (first === -1) return true;
@@ -246,15 +294,23 @@ function isKokushi(counts) {
   return required.every((i) => counts[i] >= 1) && required.some((i) => counts[i] >= 2);
 }
 
-function showTsumoIfAvailable() {
-  if (!isWinning(game.hands[0])) { hideActions(); return; }
-  els.winAction.textContent = "ツモ";
-  els.passAction.hidden = true;
-  els.actionBar.hidden = false;
+function refreshActions() {
+  hideActions();
+  if (game.over || game.turn !== 0 || game.busy) return;
+  if (isWinning(game.hands[0])) {
+    els.winAction.textContent = "ツモ";
+    els.winAction.hidden = false;
+  }
+  if (!game.riichi[0] && getRiichiDiscards(game.hands[0]).length) els.reachAction.hidden = false;
+  if (game.hands[0].some((tile) => canonical(tile.code) === "4z")) els.northAction.hidden = false;
+  els.actionBar.hidden = [els.winAction, els.reachAction, els.northAction].every((el) => el.hidden);
 }
 
 function hideActions() {
   els.actionBar.hidden = true;
+  els.winAction.hidden = true;
+  els.reachAction.hidden = true;
+  els.northAction.hidden = true;
   els.passAction.hidden = true;
 }
 
@@ -272,6 +328,30 @@ function passRon() {
   game.pendingRonTile = null;
   hideActions();
   continueAfterDiscard(discarder);
+}
+
+function beginRiichi() {
+  game.declaringRiichi = true;
+  hideActions();
+  setStatus("リーチ宣言牌を選んでください");
+  renderHand();
+}
+
+function extractNorth() {
+  if (game.turn !== 0 || game.busy || game.over) return;
+  const north = game.hands[0].find((tile) => canonical(tile.code) === "4z");
+  if (!north) return;
+  game.busy = true;
+  game.hands[0] = game.hands[0].filter((tile) => tile.id !== north.id);
+  game.nuki[0] += 1;
+  setStatus("北を抜きました。嶺上牌をツモします");
+  vibrate(25);
+  timer = setTimeout(() => {
+    if (!drawTile(0) || game.over) return;
+    game.busy = false;
+    render();
+    refreshActions();
+  }, 280);
 }
 
 function finishGame(title, detail, hand, mark) {
@@ -295,13 +375,23 @@ function render() {
   });
   els.wallCount.textContent = `残り ${game.wall.length}`;
   els.cpuCounts.forEach((el, index) => { el.textContent = game.hands[index + 1].length; });
+  els.scores.forEach((el, index) => { el.textContent = game.points[index].toLocaleString("ja-JP"); });
+  els.nukiCounts.forEach((el, index) => {
+    el.textContent = `北×${game.nuki[index]}`;
+    el.hidden = game.nuki[index] === 0;
+  });
+  els.riichiSticks.textContent = `供託 ${game.riichiSticks}`;
 }
 
 function renderHand() {
   const sorted = [...game.hands[0]].sort(tileSort);
+  const candidates = game.declaringRiichi ? getRiichiDiscards(game.hands[0]) : [];
   els.hand.innerHTML = sorted.map((tile) => {
     const drawn = tile.id === game.drawnId ? " drawn" : "";
-    return `<button class="tile-button${drawn}" type="button" data-id="${tile.id}" aria-label="${displayName(tile.code)}を打つ" ${game.turn !== 0 || game.busy || game.over ? "disabled" : ""}>${tileImage(tile, "")}</button>`;
+    const candidate = candidates.includes(tile.id) ? " riichi-candidate" : "";
+    const riichiLocked = game.riichi[0] && tile.id !== game.drawnId;
+    const invalidDeclaration = game.declaringRiichi && !candidates.includes(tile.id);
+    return `<button class="tile-button${drawn}${candidate}" type="button" data-id="${tile.id}" aria-label="${displayName(tile.code)}を打つ" ${game.turn !== 0 || game.busy || game.over || riichiLocked || invalidDeclaration ? "disabled" : ""}>${tileImage(tile, "")}</button>`;
   }).join("");
 }
 
@@ -329,13 +419,22 @@ function vibrate(pattern) {
 
 // Small, read-only hook used by the repository's rule smoke tests.
 Object.defineProperty(globalThis, "__sanmaEngine", {
-  value: Object.freeze({ isWinning, canonical, tileIndex }),
+  value: Object.freeze({ isWinning, isTenpai, getRiichiDiscards, canonical, tileIndex }),
   configurable: true,
 });
 
 els.hand.addEventListener("click", (event) => {
   const button = event.target.closest(".tile-button");
   if (!button || game.turn !== 0 || game.busy || game.over) return;
+  if (game.declaringRiichi) {
+    const valid = getRiichiDiscards(game.hands[0]).includes(Number(button.dataset.id));
+    if (!valid) return;
+    game.declaringRiichi = false;
+    game.riichi[0] = true;
+    game.points[0] -= 1000;
+    game.riichiSticks += 1;
+    setStatus("リーチ！");
+  }
   button.classList.add("selected");
   game.busy = true;
   setTimeout(() => discard(0, Number(button.dataset.id)), 100);
@@ -343,6 +442,8 @@ els.hand.addEventListener("click", (event) => {
 
 els.winAction.addEventListener("click", winAction);
 els.passAction.addEventListener("click", passRon);
+els.reachAction.addEventListener("click", beginRiichi);
+els.northAction.addEventListener("click", extractNorth);
 document.querySelector("#new-game").addEventListener("click", startGame);
 document.querySelector("#play-again").addEventListener("click", startGame);
 

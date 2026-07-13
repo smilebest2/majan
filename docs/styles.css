@@ -66,6 +66,7 @@ h1 { margin: 0; font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; font-si
 .player-card { display: flex; align-items: center; gap: 6px; font-size: 10px; color: #d7eadf; }
 .opponent-right .player-card { justify-content: flex-end; }
 .player-card strong { color: #fff; font-size: 11px; }
+.nuki-count { padding: 2px 5px; border-radius: 999px; background: #e7d9ae; color: #19332d; font-size: 8px; font-style: normal; font-weight: 900; }
 .wind {
   display: inline-grid; place-items: center; width: 23px; height: 23px; border-radius: 50%;
   background: #f2e5c0; color: #172d28; font-family: serif; font-weight: 900;
@@ -100,6 +101,7 @@ h1 { margin: 0; font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; font-si
 .dora-box { position: absolute; top: 35px; left: 26px; display: flex; align-items: center; gap: 5px; font-size: 8px; color: #a7beb5; }
 .dora-box img { width: 25px; height: auto; }
 .wall-count { position: absolute; bottom: 9px; right: 15px; font-size: 10px; color: #f7eed2; }
+.riichi-sticks { position: absolute; bottom: 6px; left: 13px; font-size: 8px; color: #e3bd5c; }
 
 .status {
   position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%);
@@ -123,6 +125,7 @@ h1 { margin: 0; font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; font-si
 .tile-button img { display: block; width: 100%; max-width: 31px; height: auto; pointer-events: none; filter: drop-shadow(0 3px 2px rgba(0,0,0,.5)); }
 .tile-button.drawn { margin-left: 4px; }
 .tile-button:active, .tile-button.selected { transform: translateY(-10px); filter: brightness(1.12); }
+.tile-button.riichi-candidate::after { content: ""; position: absolute; inset: 7px 1px 0; border: 2px solid #f2c957; border-radius: 3px; box-shadow: 0 0 8px #f2c957; pointer-events: none; }
 .tile-button:disabled { opacity: .78; }
 .hint { margin: 3px 0 0; text-align: center; color: #87a89d; font-size: 9px; letter-spacing: .08em; }
 
@@ -130,6 +133,8 @@ h1 { margin: 0; font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; font-si
 .action { border: 0; border-radius: 999px; min-width: 92px; padding: 9px 18px; font-weight: 900; letter-spacing: .08em; }
 .action.primary { background: linear-gradient(135deg, #f4ce68, #d8952e); color: #281b02; box-shadow: 0 4px 12px rgba(0,0,0,.28); }
 .action.secondary { background: #294e46; color: #e7f1ed; border: 1px solid #52746c; }
+.action.reach { background: #be3b34; color: white; }
+.action.north { background: #e8e0c4; color: #18352e; }
 .action.wide { width: 100%; margin-top: 18px; }
 
 .result-dialog {
