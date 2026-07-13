@@ -12,7 +12,7 @@ const els = {
   rivers: [0, 1, 2].map((i) => document.querySelector(`#river-${i}`)),
   wallCount: document.querySelector("#wall-count"),
   status: document.querySelector("#status"),
-  dora: document.querySelector("#dora"),
+  doraList: document.querySelector("#dora-list"),
   roundMark: document.querySelector("#round-mark"),
   roundSub: document.querySelector("#round-sub"),
   actionBar: document.querySelector("#action-bar"),
@@ -20,6 +20,8 @@ const els = {
   passAction: document.querySelector("#pass-action"),
   reachAction: document.querySelector("#reach-action"),
   northAction: document.querySelector("#north-action"),
+  ponAction: document.querySelector("#pon-action"),
+  kanAction: document.querySelector("#kan-action"),
   dialog: document.querySelector("#result-dialog"),
   resultEyebrow: document.querySelector("#result-eyebrow"),
   resultTitle: document.querySelector("#result-title"),
@@ -33,6 +35,7 @@ const els = {
   scores: [0, 1, 2].map((i) => document.querySelector(`#score-${i}`)),
   winds: [0, 1, 2].map((i) => document.querySelector(`#wind-${i}`)),
   nukiCounts: [0, 1, 2].map((i) => document.querySelector(`#nuki-${i}`)),
+  melds: [0, 1, 2].map((i) => document.querySelector(`#melds-${i}`)),
   riichiSticks: document.querySelector("#riichi-sticks"),
 };
 
@@ -135,6 +138,10 @@ function startGame(matchState = null) {
     riichiSticks: state.riichiSticks,
     declaringRiichi: false,
     nuki: [0, 0, 0],
+    melds: [[], [], []],
+    kanCount: 0,
+    rinshan: [false, false, false],
+    pendingCall: null,
     matchOver: false,
     nextState: null,
   };
@@ -150,19 +157,18 @@ function startGame(matchState = null) {
   for (let deal = 0; deal < 13; deal += 1) {
     for (let player = 0; player < 3; player += 1) game.hands[player].push(game.wall.pop());
   }
-  els.dora.src = tileSrc(deadWall[0].code);
-  els.dora.alt = `ドラ表示牌 ${displayName(deadWall[0].code)}`;
   drawTile(game.dealer);
   render();
   beginTurn(game.dealer, true);
 }
 
-function drawTile(player) {
+function drawTile(player, { rinshan = false } = {}) {
   if (!game.wall.length) return false;
   const tile = game.wall.pop();
   game.hands[player].push(tile);
   game.drawnIds[player] = tile.id;
   game.drawCounts[player] += 1;
+  game.rinshan[player] = rinshan;
   game.turn = player;
   return true;
 }
@@ -201,6 +207,7 @@ function discard(player, tileId) {
   const [tile] = hand.splice(index, 1);
   game.rivers[player].push(tile);
   game.drawnIds[player] = null;
+  game.rinshan[player] = false;
   if (game.justDeclaredRiichi[player]) game.justDeclaredRiichi[player] = false;
   else if (game.ippatsu[player]) game.ippatsu[player] = false;
   render();
@@ -215,7 +222,7 @@ function resolveDiscard(discarder, tile) {
     if (!score) continue;
     if (candidate === 0) {
       game.waitingRon = true;
-      game.pendingRon = { tile, discarder, score };
+      game.pendingRon = { tile, discarder, score, resume: () => offerCalls(discarder, tile, 1) };
       game.busy = false;
       els.winAction.textContent = "ロン";
       els.winAction.hidden = false;
@@ -228,7 +235,117 @@ function resolveDiscard(discarder, tile) {
     finishWin(candidate, discarder, "ron", [...game.hands[candidate], tile], score);
     return;
   }
+  offerCalls(discarder, tile, 1);
+}
+
+function matchingTiles(player, code) {
+  const target = canonical(code);
+  return game.hands[player].filter((tile) => canonical(tile.code) === target);
+}
+
+function availableCallOptions(player, tile) {
+  if (game.riichi[player]) return { pon: false, kan: false };
+  const count = matchingTiles(player, tile.code).length;
+  return { pon: count >= 2, kan: count >= 3 && game.kanCount < 4 };
+}
+
+function offerCalls(discarder, tile, startStep) {
+  for (let step = startStep; step <= 2; step += 1) {
+    const player = (discarder + step) % 3;
+    const options = availableCallOptions(player, tile);
+    if (!options.pon && !options.kan) continue;
+
+    if (player === 0) {
+      game.pendingCall = { discarder, tile, options, nextStep: step + 1 };
+      game.busy = false;
+      hideActions();
+      els.ponAction.hidden = !options.pon;
+      els.kanAction.hidden = !options.kan;
+      els.passAction.hidden = false;
+      els.actionBar.hidden = false;
+      setStatus(`${PLAYER_NAMES[discarder]}の${displayName(tile.code)}を鳴けます`);
+      return;
+    }
+
+    const honor = canonical(tile.code)[1] === "z";
+    if (options.kan && (honor || Math.random() < 0.35)) {
+      performOpenCall(player, discarder, tile, "minkan");
+      return;
+    }
+    if (options.pon && (honor || matchingTiles(player, tile.code).length >= 3 || Math.random() < 0.25)) {
+      performOpenCall(player, discarder, tile, "pon");
+      return;
+    }
+  }
   continueAfterDiscard(discarder);
+}
+
+function takeMatchingTiles(player, code, count) {
+  const target = canonical(code);
+  const taken = [];
+  game.hands[player] = game.hands[player].filter((tile) => {
+    if (taken.length < count && canonical(tile.code) === target) {
+      taken.push(tile);
+      return false;
+    }
+    return true;
+  });
+  return taken;
+}
+
+function removeCalledDiscard(discarder, tile) {
+  const river = game.rivers[discarder];
+  const index = river.findIndex((item) => item.id === tile.id);
+  if (index >= 0) river.splice(index, 1);
+}
+
+function cancelIppatsu() {
+  game.ippatsu = [false, false, false];
+}
+
+function performOpenCall(player, discarder, tile, type) {
+  const needed = type === "pon" ? 2 : 3;
+  const ownTiles = takeMatchingTiles(player, tile.code, needed);
+  removeCalledDiscard(discarder, tile);
+  game.melds[player].push({
+    type,
+    code: canonical(tile.code),
+    tiles: [...ownTiles.map((item) => item.code), tile.code],
+    from: discarder,
+  });
+  game.pendingCall = null;
+  game.turn = player;
+  game.drawnIds[player] = null;
+  cancelIppatsu();
+  hideActions();
+  render();
+
+  if (type === "minkan") {
+    game.kanCount += 1;
+    setStatus(`${PLAYER_NAMES[player]}が明槓しました`);
+    if (!drawTile(player, { rinshan: true })) {
+      finishDraw();
+      return;
+    }
+    beginTurn(player);
+    return;
+  }
+
+  setStatus(`${PLAYER_NAMES[player]}がポンしました`);
+  if (player === 0) {
+    game.busy = false;
+    renderHand();
+  } else {
+    game.busy = true;
+    timer = setTimeout(() => cpuDiscard(player), 420);
+  }
+}
+
+function passCall() {
+  const pending = game.pendingCall;
+  game.pendingCall = null;
+  hideActions();
+  offerCalls(pending.discarder, pending.tile, pending.nextStep);
 }
 
 function continueAfterDiscard(discarder) {
@@ -249,7 +366,7 @@ function cpuDiscard(player) {
   if (game.over) return;
   const hand = game.hands[player];
   let pool = hand;
-  const riichiCandidates = !game.riichi[player] && game.points[player] >= 1000 ? getRiichiDiscards(hand) : [];
+  const riichiCandidates = isClosedMelds(game.melds[player]) && !game.riichi[player] && game.points[player] >= 1000 ? getRiichiDiscards(hand, game.melds[player]) : [];
   if (riichiCandidates.length) {
     game.riichi[player] = true;
     game.doubleRiichi[player] = game.rivers[player].length === 0;
@@ -281,6 +398,11 @@ function cpuDiscard(player) {
 }
 
 function cpuNukiThenDiscard(player) {
+  const kanOptions = getSelfKanOptions(player);
+  if (kanOptions.length && !game.riichi[player]) {
+    performSelfKan(player, kanOptions[0]);
+    return;
+  }
   const north = game.hands[player].find((tile) => canonical(tile.code) === "4z");
   if (!north || game.riichi[player]) {
     cpuDiscard(player);
@@ -301,6 +423,78 @@ function cpuNukiThenDiscard(player) {
     return;
   }
   timer = setTimeout(() => cpuNukiThenDiscard(player), 280);
+}
+
+function getSelfKanOptions(player) {
+  if (game.kanCount >= 4 || game.riichi[player]) return [];
+  const options = [];
+  game.melds[player].forEach((meld, meldIndex) => {
+    if (meld.type === "pon" && matchingTiles(player, meld.code).length) {
+      options.push({ type: "kakan", code: meld.code, meldIndex });
+    }
+  });
+  const counts = new Map();
+  game.hands[player].forEach((tile) => counts.set(canonical(tile.code), (counts.get(canonical(tile.code)) || 0) + 1));
+  for (const [code, count] of counts) {
+    if (count === 4) options.push({ type: "ankan", code });
+  }
+  return options;
+}
+
+function performSelfKan(player, option = getSelfKanOptions(player)[0]) {
+  if (!option || game.over) return;
+  game.busy = true;
+  hideActions();
+
+  if (option.type === "kakan") {
+    const tile = matchingTiles(player, option.code)[0];
+    resolveChankan(player, tile, () => {
+      takeMatchingTiles(player, option.code, 1);
+      const meld = game.melds[player][option.meldIndex];
+      meld.type = "kakan";
+      meld.tiles.push(tile.code);
+      completeKanDraw(player, "加槓");
+    });
+    return;
+  }
+
+  const tiles = takeMatchingTiles(player, option.code, 4);
+  game.melds[player].push({ type: "ankan", code: option.code, tiles: tiles.map((tile) => tile.code), from: player });
+  completeKanDraw(player, "暗槓");
+}
+
+function resolveChankan(kanner, tile, afterKan) {
+  const candidates = [1, 2].map((step) => (kanner + step) % 3);
+  for (const candidate of candidates) {
+    const score = getScore(candidate, "ron", tile, { chankan: true });
+    if (!score) continue;
+    if (candidate === 0) {
+      game.waitingRon = true;
+      game.pendingRon = { tile, discarder: kanner, score, resume: afterKan };
+      game.busy = false;
+      els.winAction.textContent = "ロン";
+      els.winAction.hidden = false;
+      els.passAction.hidden = false;
+      els.actionBar.hidden = false;
+      setStatus(`${PLAYER_NAMES[kanner]}の加槓に槍槓できます`);
+      return;
+    }
+    finishWin(candidate, kanner, "ron", [...game.hands[candidate], tile], score);
+    return;
+  }
+  afterKan();
+}
+
+function completeKanDraw(player, label) {
+  game.kanCount += 1;
+  cancelIppatsu();
+  setStatus(`${PLAYER_NAMES[player]}が${label}しました`);
+  if (!drawTile(player, { rinshan: true })) {
+    finishDraw();
+    return;
+  }
+  render();
+  beginTurn(player);
 }
 
 function handPotential(hand) {
@@ -331,26 +525,30 @@ function codesOf(hand) {
   return hand.map((tile) => tile.code);
 }
 
-function isWinning(hand) {
-  return Scoring.isWinning(codesOf(hand));
+function isWinning(hand, melds = []) {
+  return Scoring.isWinning(codesOf(hand), melds);
 }
 
-function isTenpai(hand) {
-  return Scoring.isTenpai(codesOf(hand));
+function isTenpai(hand, melds = []) {
+  return Scoring.isTenpai(codesOf(hand), melds);
 }
 
-function getRiichiDiscards(hand) {
-  if (hand.length % 3 !== 2) return [];
-  return hand.filter((tile) => isTenpai(hand.filter((item) => item.id !== tile.id))).map((tile) => tile.id);
+function isClosedMelds(melds) {
+  return melds.every((meld) => meld.type === "ankan");
+}
+
+function getRiichiDiscards(hand, melds = []) {
+  if (hand.length + melds.length * 3 !== 14) return [];
+  return hand.filter((tile) => isTenpai(hand.filter((item) => item.id !== tile.id), melds)).map((tile) => tile.id);
 }
 
 function seatWind(player) {
   return ((player - game.dealer + 3) % 3) + 1;
 }
 
-function getScore(player, winType, ronTile = null) {
+function getScore(player, winType, ronTile = null, extraContext = {}) {
   const hand = ronTile ? [...game.hands[player], ronTile] : game.hands[player];
-  if (hand.length !== 14) return null;
+  if (hand.length + game.melds[player].length * 3 !== 14) return null;
   const drawnTile = hand.find((tile) => tile.id === game.drawnIds[player]);
   const lastTile = ronTile || drawnTile || hand[hand.length - 1];
   return Scoring.scoreHand(codesOf(hand), {
@@ -361,11 +559,15 @@ function getScore(player, winType, ronTile = null) {
     seatWind: seatWind(player),
     roundWind: game.roundWind + 1,
     doraIndicator: game.deadWall[0].code,
+    doraIndicators: game.deadWall.slice(0, 1 + game.kanCount).map((tile) => tile.code),
     nuki: game.nuki[player],
+    melds: game.melds[player],
     haitei: game.wall.length === 0,
+    rinshan: game.rinshan[player],
     lastTile: lastTile.code,
     firstDraw: game.drawCounts[player] === 1,
     isDealer: player === game.dealer,
+    ...extraContext,
   });
 }
 
@@ -376,13 +578,14 @@ function refreshActions() {
     els.winAction.textContent = "ツモ";
     els.winAction.hidden = false;
   }
-  if (!game.riichi[0] && game.points[0] >= 1000 && getRiichiDiscards(game.hands[0]).length) {
+  if (isClosedMelds(game.melds[0]) && !game.riichi[0] && game.points[0] >= 1000 && getRiichiDiscards(game.hands[0], game.melds[0]).length) {
     els.reachAction.hidden = false;
   }
   if (!game.riichi[0] && game.hands[0].some((tile) => canonical(tile.code) === "4z")) {
     els.northAction.hidden = false;
   }
-  els.actionBar.hidden = [els.winAction, els.reachAction, els.northAction].every((el) => el.hidden);
+  if (getSelfKanOptions(0).length) els.kanAction.hidden = false;
+  els.actionBar.hidden = [els.winAction, els.reachAction, els.northAction, els.kanAction].every((el) => el.hidden);
 }
 
 function hideActions() {
@@ -390,6 +593,8 @@ function hideActions() {
   els.winAction.hidden = true;
   els.reachAction.hidden = true;
   els.northAction.hidden = true;
+  els.ponAction.hidden = true;
+  els.kanAction.hidden = true;
   els.passAction.hidden = true;
 }
 
@@ -404,11 +609,12 @@ function winAction() {
 }
 
 function passRon() {
-  const discarder = game.pendingRon.discarder;
+  const { discarder, resume } = game.pendingRon;
   game.waitingRon = false;
   game.pendingRon = null;
   hideActions();
-  continueAfterDiscard(discarder);
+  if (resume) resume();
+  else continueAfterDiscard(discarder);
 }
 
 function beginRiichi() {
@@ -514,11 +720,17 @@ function finishWin(winner, loser, winType, hand, score) {
     title,
     mark: "和",
     detail: `${PLAYER_NAMES[winner]}の和了`,
-    hand,
+    hand: resultDisplayHand(winner, hand),
     yakuLine,
     scoreLine,
   });
   render();
+}
+
+function resultDisplayHand(player, concealedHand) {
+  let syntheticId = -1000;
+  const meldTiles = game.melds[player].flatMap((meld) => (meld.tiles || []).map((code) => ({ id: syntheticId -= 1, code })));
+  return [...concealedHand, ...meldTiles];
 }
 
 function finishDraw() {
@@ -528,7 +740,7 @@ function finishDraw() {
   clearTimeout(timer);
   hideActions();
 
-  const tenpai = game.hands.map((hand) => isTenpai(hand));
+  const tenpai = game.hands.map((hand, player) => isTenpai(hand, game.melds[player]));
   const readyCount = tenpai.filter(Boolean).length;
   if (readyCount > 0 && readyCount < 3) {
     const gain = 3000 / readyCount;
@@ -581,6 +793,7 @@ function render() {
     els.rivers[player].innerHTML = river.map((tile) => tileImage(tile, displayName(tile.code))).join("");
   });
   els.wallCount.textContent = `残り ${game.wall.length}`;
+  els.doraList.innerHTML = game.deadWall.slice(0, 1 + game.kanCount).map((tile) => tileImage(tile, `ドラ表示牌 ${displayName(tile.code)}`)).join("");
   els.roundMark.textContent = roundLabel();
   els.roundSub.textContent = `${game.honba}本場`;
   els.cpuCounts.forEach((el, index) => { el.textContent = game.hands[index + 1].length; });
@@ -594,11 +807,27 @@ function render() {
     el.hidden = game.nuki[index] === 0;
   });
   els.riichiSticks.textContent = `供託 ${game.riichiSticks}`;
+  renderMelds();
+}
+
+function renderMelds() {
+  els.melds.forEach((container, player) => {
+    container.innerHTML = game.melds[player].map((meld) => {
+      const codes = meld.tiles || Array(meld.type === "pon" ? 3 : 4).fill(meld.code);
+      const images = codes.map((code, index) => {
+        const concealedEdge = meld.type === "ankan" && (index === 0 || index === codes.length - 1);
+        const displayCode = concealedEdge ? "ura" : code;
+        const called = meld.type !== "ankan" && index === codes.length - 1 ? " called" : "";
+        return `<img class="${called.trim()}" src="${tileSrc(displayCode)}" alt="${concealedEdge ? "伏せ牌" : displayName(code)}" />`;
+      }).join("");
+      return `<span class="meld-set ${meld.type}" aria-label="${meld.type === "pon" ? "ポン" : "カン"}">${images}</span>`;
+    }).join("");
+  });
 }
 
 function renderHand() {
   const sorted = [...game.hands[0]].sort(tileSort);
-  const candidates = game.declaringRiichi ? getRiichiDiscards(game.hands[0]) : [];
+  const candidates = game.declaringRiichi ? getRiichiDiscards(game.hands[0], game.melds[0]) : [];
   els.hand.innerHTML = sorted.map((tile) => {
     const drawn = tile.id === game.drawnIds[0] ? " drawn" : "";
     const candidate = candidates.includes(tile.id) ? " riichi-candidate" : "";
@@ -644,7 +873,7 @@ els.hand.addEventListener("click", (event) => {
   const button = event.target.closest(".tile-button");
   if (!button || game.turn !== 0 || game.busy || game.over) return;
   if (game.declaringRiichi) {
-    const valid = getRiichiDiscards(game.hands[0]).includes(Number(button.dataset.id));
+    const valid = getRiichiDiscards(game.hands[0], game.melds[0]).includes(Number(button.dataset.id));
     if (!valid) return;
     game.declaringRiichi = false;
     game.riichi[0] = true;
@@ -661,9 +890,25 @@ els.hand.addEventListener("click", (event) => {
 });
 
 els.winAction.addEventListener("click", winAction);
-els.passAction.addEventListener("click", passRon);
+els.passAction.addEventListener("click", () => {
+  if (game.waitingRon) passRon();
+  else if (game.pendingCall) passCall();
+});
 els.reachAction.addEventListener("click", beginRiichi);
 els.northAction.addEventListener("click", extractNorth);
+els.ponAction.addEventListener("click", () => {
+  if (!game.pendingCall) return;
+  const { discarder, tile } = game.pendingCall;
+  performOpenCall(0, discarder, tile, "pon");
+});
+els.kanAction.addEventListener("click", () => {
+  if (game.pendingCall) {
+    const { discarder, tile } = game.pendingCall;
+    performOpenCall(0, discarder, tile, "minkan");
+  } else {
+    performSelfKan(0);
+  }
+});
 document.querySelector("#new-game").addEventListener("click", () => {
   clearMatchState();
   startGame();

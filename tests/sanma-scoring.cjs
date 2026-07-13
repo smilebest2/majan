@@ -34,4 +34,35 @@ assert.deepEqual(ronPayment.transfers, [12300, -12300, 0], "dealer mangan ron pl
 const tsumoPayment = calculatePayments({ basePoints: 2000 }, { winType: "tsumo", winner: 1, dealer: 0, honba: 0 });
 assert.deepEqual(tsumoPayment.transfers, [-4000, 6000, -2000], "non-dealer sanma tsumo-loss payment");
 
+const openYakuhai = ["1p", "2p", "3p", "4p", "5p", "6p", "7s", "8s", "9s", "2z", "2z"];
+const openScore = scoreHand(openYakuhai, {
+  winType: "ron",
+  lastTile: "9s",
+  seatWind: 1,
+  roundWind: 1,
+  melds: [{ type: "pon", code: "5z" }],
+});
+assert.ok(openScore.yaku.some((item) => item.name.includes("白")), "open yakuhai hand");
+assert.equal(openScore.yaku.some((item) => item.name === "門前清自摸和"), false, "open hand is not menzen");
+assert.equal(isTenpai(["1p", "2p", "3p", "4p", "5p", "6p", "7s", "8s", "2z", "2z"], [{ type: "pon", code: "5z" }]), true, "open hand tenpai");
+
+const openKanScore = scoreHand(openYakuhai, {
+  winType: "ron",
+  lastTile: "9s",
+  melds: [{ type: "minkan", code: "5z" }],
+  doraIndicators: ["7z", "9p"],
+});
+assert.ok(openKanScore.han >= 4, "kan dora indicators include meld copies");
+
+const threeKanScore = scoreHand(["5z", "5z", "5z", "2z", "2z"], {
+  winType: "ron",
+  lastTile: "5z",
+  melds: [
+    { type: "minkan", code: "1p" },
+    { type: "ankan", code: "2p" },
+    { type: "kakan", code: "3p" },
+  ],
+});
+assert.ok(threeKanScore.yaku.some((item) => item.name === "三槓子"), "three kans yaku");
+
 console.log("sanma scoring tests passed");

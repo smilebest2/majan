@@ -28,6 +28,7 @@
             <em id="nuki-1" class="nuki-count" hidden>北×0</em>
           </div>
           <div class="hidden-hand"><img src="./img/hai/ura.png" alt="伏せ牌" /><span id="cpu1-count">13</span></div>
+          <div id="melds-1" class="meld-row"></div>
         </div>
 
         <div class="opponent opponent-right">
@@ -38,6 +39,7 @@
             <em id="nuki-2" class="nuki-count" hidden>北×0</em>
           </div>
           <div class="hidden-hand"><img src="./img/hai/ura.png" alt="伏せ牌" /><span id="cpu2-count">13</span></div>
+          <div id="melds-2" class="meld-row"></div>
         </div>
 
         <div id="river-1" class="river river-left" aria-label="CPU青の捨て牌"></div>
@@ -50,7 +52,7 @@
           </div>
           <div class="dora-box">
             <span>ドラ表示</span>
-            <img id="dora" src="./img/hai/1p.png" alt="ドラ表示牌" />
+            <div id="dora-list" class="dora-list"><img src="./img/hai/1p.png" alt="ドラ表示牌" /></div>
           </div>
           <strong id="wall-count" class="wall-count">残り 54</strong>
           <span id="riichi-sticks" class="riichi-sticks">供託 0</span>
@@ -65,6 +67,8 @@
           <button id="win-action" class="action primary" type="button">ツモ</button>
           <button id="reach-action" class="action reach" type="button" hidden>リーチ</button>
           <button id="north-action" class="action north" type="button" hidden>北抜き</button>
+          <button id="pon-action" class="action call" type="button" hidden>ポン</button>
+          <button id="kan-action" class="action call" type="button" hidden>カン</button>
           <button id="pass-action" class="action secondary" type="button" hidden>見送る</button>
         </div>
         <div class="self-info">
@@ -73,6 +77,7 @@
           <em id="nuki-0" class="nuki-count" hidden>北×0</em>
           <strong id="score-0">35,000</strong>
         </div>
+        <div id="melds-0" class="meld-row meld-self"></div>
         <div id="hand" class="hand" aria-label="あなたの手牌"></div>
         <p class="hint">牌をタップして打牌</p>
       </section>

@@ -49,28 +49,29 @@
     return counts.filter((count) => count === 2).length === 7;
   }
 
-  function findDecompositions(counts) {
+  function findDecompositions(counts, groupsNeeded = 4) {
     const results = [];
     for (let pair = 0; pair < counts.length; pair += 1) {
       if (counts[pair] < 2) continue;
       counts[pair] -= 2;
-      collectMelds(counts, [], (groups) => results.push({ pair, groups }));
+      collectMelds(counts, [], groupsNeeded, (groups) => results.push({ pair, groups }));
       counts[pair] += 2;
     }
     return results;
   }
 
-  function collectMelds(counts, groups, done) {
+  function collectMelds(counts, groups, groupsNeeded, done) {
     const first = counts.findIndex((count) => count > 0);
     if (first === -1) {
-      if (groups.length === 4) done(groups.map((group) => ({ ...group })));
+      if (groups.length === groupsNeeded) done(groups.map((group) => ({ ...group })));
       return;
     }
+    if (groups.length >= groupsNeeded) return;
 
     if (counts[first] >= 3) {
       counts[first] -= 3;
       groups.push({ type: "triplet", tile: first });
-      collectMelds(counts, groups, done);
+      collectMelds(counts, groups, groupsNeeded, done);
       groups.pop();
       counts[first] += 3;
     }
@@ -86,7 +87,7 @@
         counts[second] -= 1;
         counts[third] -= 1;
         groups.push({ type: "sequence", tile: first });
-        collectMelds(counts, groups, done);
+        collectMelds(counts, groups, groupsNeeded, done);
         groups.pop();
         counts[first] += 1;
         counts[second] += 1;
@@ -95,16 +96,17 @@
     }
   }
 
-  function isWinning(codes) {
-    if (codes.length % 3 !== 2) return false;
+  function isWinning(codes, melds = []) {
+    if (codes.length + melds.length * 3 !== 14) return false;
     const counts = toCounts(codes);
-    return isKokushi(counts) || isChiitoitsu(counts) || findDecompositions(counts).length > 0;
+    if (!melds.length && (isKokushi(counts) || isChiitoitsu(counts))) return true;
+    return findDecompositions(counts, 4 - melds.length).length > 0;
   }
 
-  function isTenpai(codes) {
-    if (codes.length % 3 !== 1) return false;
+  function isTenpai(codes, melds = []) {
+    if (codes.length + melds.length * 3 !== 13) return false;
     const counts = toCounts(codes);
-    return TYPES.some((code, index) => counts[index] < 4 && isWinning([...codes, code]));
+    return TYPES.some((code, index) => counts[index] < 4 && isWinning([...codes, code], melds));
   }
 
   function getPlacements(decomposition, winIndex) {
@@ -130,20 +132,22 @@
     if (context.doubleRiichi) yaku.push({ name: "ダブルリーチ", han: 2 });
     else if (context.riichi) yaku.push({ name: "リーチ", han: 1 });
     if (context.riichi && context.ippatsu) yaku.push({ name: "一発", han: 1 });
-    if (context.winType === "tsumo") yaku.push({ name: "門前清自摸和", han: 1 });
+    if (context.winType === "tsumo" && context.closed) yaku.push({ name: "門前清自摸和", han: 1 });
     if (context.haitei) yaku.push({ name: context.winType === "tsumo" ? "海底摸月" : "河底撈魚", han: 1 });
+    if (context.rinshan && context.winType === "tsumo") yaku.push({ name: "嶺上開花", han: 1 });
+    if (context.chankan && context.winType === "ron") yaku.push({ name: "槍槓", han: 1 });
     if (codes.every((code) => {
       const index = tileIndex(code);
       return !isYaochuIndex(index);
     })) yaku.push({ name: "断么九", han: 1 });
   }
 
-  function addFlushYaku(yaku, codes) {
+  function addFlushYaku(yaku, codes, closed = true) {
     const canonicalCodes = codes.map(canonical);
     const suits = new Set(canonicalCodes.filter((code) => code[1] !== "z").map((code) => code[1]));
     const hasHonors = canonicalCodes.some((code) => code[1] === "z");
-    if (suits.size === 1 && !hasHonors) yaku.push({ name: "清一色", han: 6 });
-    else if (suits.size === 1 && hasHonors) yaku.push({ name: "混一色", han: 3 });
+    if (suits.size === 1 && !hasHonors) yaku.push({ name: "清一色", han: closed ? 6 : 5 });
+    else if (suits.size === 1 && hasHonors) yaku.push({ name: "混一色", han: closed ? 3 : 2 });
   }
 
   function yakumanForTiles(codes) {
@@ -161,16 +165,25 @@
 
     const yaku = [{ name: "七対子", han: 2 }];
     addCommonYaku(yaku, codes, context);
-    addFlushYaku(yaku, codes);
+    addFlushYaku(yaku, codes, true);
     if (codes.map(tileIndex).every(isYaochuIndex)) yaku.push({ name: "混老頭", han: 2 });
     return finalize(yaku, 25, [], codes, context);
   }
 
   function evaluateNormal(codes, decomposition, placement, context) {
     const yaku = [];
-    const yakuman = yakumanForTiles(codes);
-    const triplets = decomposition.groups.filter((group) => group.type === "triplet");
-    const sequences = decomposition.groups.filter((group) => group.type === "sequence");
+    const patternCodes = context.allCodes || codes;
+    const yakuman = yakumanForTiles(patternCodes);
+    const fixedGroups = (context.melds || []).map((meld) => ({
+      type: "triplet",
+      tile: tileIndex(meld.code),
+      open: meld.type !== "ankan",
+      kan: meld.type !== "pon",
+    }));
+    const concealedGroups = decomposition.groups.map((group) => ({ ...group, open: false, kan: false }));
+    const allGroups = [...concealedGroups, ...fixedGroups];
+    const triplets = allGroups.filter((group) => group.type === "triplet");
+    const sequences = allGroups.filter((group) => group.type === "sequence");
     const tripletTiles = new Set(triplets.map((group) => group.tile));
     const pairCode = TYPES[decomposition.pair];
 
@@ -181,13 +194,13 @@
     if (windTriplets.length === 4) yakuman.push("大四喜");
     else if (windTriplets.length === 3 && windPair) yakuman.push("小四喜");
 
-    let concealedTriplets = triplets.length;
+    let concealedTriplets = triplets.filter((group) => !group.open).length;
     if (context.winType === "ron" && placement.kind === "triplet") concealedTriplets -= 1;
     if (concealedTriplets === 4) yakuman.push("四暗刻");
     if (yakuman.length) return finalize([], 0, [...new Set(yakuman)], codes, context);
 
-    addCommonYaku(yaku, codes, context);
-    addFlushYaku(yaku, codes);
+    addCommonYaku(yaku, patternCodes, context);
+    addFlushYaku(yaku, patternCodes, context.closed);
 
     for (const group of triplets) {
       const code = TYPES[group.tile];
@@ -198,23 +211,24 @@
       if (n === context.roundWind) yaku.push({ name: "場風牌", han: 1 });
     }
 
-    if (sequences.length === 4 && pairFu(decomposition.pair, context) === 0 && placement.wait === "ryanmen") {
+    if (context.closed && sequences.length === 4 && pairFu(decomposition.pair, context) === 0 && placement.wait === "ryanmen") {
       yaku.push({ name: "平和", han: 1 });
     }
 
     const sequenceCounts = new Map();
     for (const group of sequences) sequenceCounts.set(group.tile, (sequenceCounts.get(group.tile) || 0) + 1);
     const sequencePairs = [...sequenceCounts.values()].reduce((sum, count) => sum + Math.floor(count / 2), 0);
-    if (sequencePairs >= 2) yaku.push({ name: "二盃口", han: 3 });
-    else if (sequencePairs === 1) yaku.push({ name: "一盃口", han: 1 });
+    if (context.closed && sequencePairs >= 2) yaku.push({ name: "二盃口", han: 3 });
+    else if (context.closed && sequencePairs === 1) yaku.push({ name: "一盃口", han: 1 });
 
     for (const suit of ["p", "s"]) {
       const starts = [1, 4, 7].map((n) => tileIndex(`${n}${suit}`));
-      if (starts.every((index) => sequenceCounts.has(index))) yaku.push({ name: "一気通貫", han: 2 });
+      if (starts.every((index) => sequenceCounts.has(index))) yaku.push({ name: "一気通貫", han: context.closed ? 2 : 1 });
     }
 
     if (triplets.length === 4) yaku.push({ name: "対々和", han: 2 });
     if (concealedTriplets >= 3) yaku.push({ name: "三暗刻", han: 2 });
+    if (triplets.filter((group) => group.kan).length >= 3) yaku.push({ name: "三槓子", han: 2 });
     for (const n of [1, 9]) {
       if (["m", "p", "s"].every((suit) => tripletTiles.has(tileIndex(`${n}${suit}`)))) {
         yaku.push({ name: "三色同刻", han: 2 });
@@ -225,26 +239,30 @@
       ? [1, 7].includes(Number(TYPES[group.tile][0]))
       : isYaochuIndex(group.tile));
     if (allGroupsYaochu && isYaochuIndex(decomposition.pair) && sequences.length > 0) {
-      const hasHonor = codes.some((code) => canonical(code)[1] === "z");
-      yaku.push({ name: hasHonor ? "混全帯么九" : "純全帯么九", han: hasHonor ? 2 : 3 });
+      const hasHonor = patternCodes.some((code) => canonical(code)[1] === "z");
+      const closedHan = hasHonor ? 2 : 3;
+      yaku.push({ name: hasHonor ? "混全帯么九" : "純全帯么九", han: context.closed ? closedHan : closedHan - 1 });
     }
 
-    if (codes.map(tileIndex).every(isYaochuIndex)) yaku.push({ name: "混老頭", han: 2 });
+    if (patternCodes.map(tileIndex).every(isYaochuIndex)) yaku.push({ name: "混老頭", han: 2 });
     if (dragonTriplets.length === 2 && [5, 6, 7].includes(Number(pairCode[0])) && pairCode[1] === "z") {
       yaku.push({ name: "小三元", han: 2 });
     }
 
     let fu = 20;
     const pinfu = yaku.some((item) => item.name === "平和");
-    if (context.winType === "ron") fu += 10;
+    if (context.winType === "ron" && context.closed) fu += 10;
     else if (!pinfu) fu += 2;
     fu += pairFu(decomposition.pair, context);
     if (["tanki", "kanchan", "penchan"].includes(placement.wait)) fu += 2;
-    decomposition.groups.forEach((group, groupIndex) => {
+    allGroups.forEach((group, groupIndex) => {
       if (group.type !== "triplet") return;
-      const openByRon = context.winType === "ron" && placement.groupIndex === groupIndex && placement.kind === "triplet";
+      const openByRon = !group.open && context.winType === "ron" && placement.groupIndex === groupIndex && placement.kind === "triplet";
       const terminalOrHonor = isYaochuIndex(group.tile);
-      fu += openByRon ? (terminalOrHonor ? 4 : 2) : (terminalOrHonor ? 8 : 4);
+      const open = group.open || openByRon;
+      let groupFu = open ? (terminalOrHonor ? 4 : 2) : (terminalOrHonor ? 8 : 4);
+      if (group.kan) groupFu *= 4;
+      fu += groupFu;
     });
     if (pinfu && context.winType === "tsumo") fu = 20;
     else fu = Math.ceil(fu / 10) * 10;
@@ -287,9 +305,15 @@
     if (yakuHan === 0) return null;
 
     const canonicalCodes = rawCodes.map(canonical);
-    const doraTile = context.doraIndicator ? doraFromIndicator(context.doraIndicator) : null;
-    const dora = doraTile ? canonicalCodes.filter((code) => code === doraTile).length : 0;
-    const red = rawCodes.filter((code) => code && code[0] === "0").length;
+    const indicators = context.doraIndicators || (context.doraIndicator ? [context.doraIndicator] : []);
+    const doraTiles = indicators.map(doraFromIndicator);
+    const dora = canonicalCodes.reduce((sum, code) => sum + doraTiles.filter((tile) => tile === code).length, 0)
+      + (context.melds || []).reduce((sum, meld) => {
+        const copies = meld.type === "pon" ? 3 : 4;
+        return sum + doraTiles.filter((tile) => tile === canonical(meld.code)).length * copies;
+      }, 0);
+    const red = rawCodes.filter((code) => code && code[0] === "0").length
+      + (context.melds || []).reduce((sum, meld) => sum + (meld.tiles || []).filter((code) => code && code[0] === "0").length, 0);
     const nuki = context.nuki || 0;
     const fullYaku = [...yaku];
     if (dora) fullYaku.push({ name: "ドラ", han: dora });
@@ -320,7 +344,6 @@
   }
 
   function scoreHand(rawCodes, suppliedContext = {}) {
-    if (rawCodes.length !== 14) return null;
     const context = {
       winType: "ron",
       riichi: false,
@@ -332,17 +355,26 @@
       nuki: 0,
       haitei: false,
       lastTile: rawCodes[rawCodes.length - 1],
+      melds: [],
       ...suppliedContext,
     };
+    context.closed = context.melds.every((meld) => meld.type === "ankan");
+    context.allCodes = [
+      ...rawCodes,
+      ...context.melds.flatMap((meld) => Array(3).fill(meld.code)),
+    ];
+    if (rawCodes.length + context.melds.length * 3 !== 14) return null;
     const counts = toCounts(rawCodes);
-    if (!isKokushi(counts) && !isChiitoitsu(counts) && findDecompositions([...counts]).length === 0) return null;
+    const groupsNeeded = 4 - context.melds.length;
+    if (!context.melds.length && !isKokushi(counts) && !isChiitoitsu(counts) && findDecompositions([...counts], groupsNeeded).length === 0) return null;
+    if (context.melds.length && findDecompositions([...counts], groupsNeeded).length === 0) return null;
     if (context.firstDraw && context.winType === "tsumo") {
       return finalize([], 0, [context.isDealer ? "天和" : "地和"], rawCodes, context);
     }
-    if (isKokushi(counts)) return finalize([], 0, ["国士無双"], rawCodes, context);
-    if (isChiitoitsu(counts)) return evaluateChiitoitsu(rawCodes, context);
+    if (!context.melds.length && isKokushi(counts)) return finalize([], 0, ["国士無双"], rawCodes, context);
+    if (!context.melds.length && isChiitoitsu(counts)) return evaluateChiitoitsu(rawCodes, context);
 
-    const decompositions = findDecompositions(counts);
+    const decompositions = findDecompositions(counts, groupsNeeded);
     if (!decompositions.length) return null;
     const winIndex = tileIndex(context.lastTile);
     let best = null;
