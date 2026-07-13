@@ -13,12 +13,22 @@ const element = () => ({
   showModal() { this.open = true; },
 });
 
-global.document = { querySelector: () => element() };
+const elements = new Map();
+global.document = {
+  querySelector(selector) {
+    if (!elements.has(selector)) elements.set(selector, element());
+    return elements.get(selector);
+  },
+};
 global.navigator = { vibrate() {} };
 global.localStorage = { getItem() { return null; }, setItem() {}, removeItem() {} };
 
 require("../docs/scoring.js");
 require("../docs/game.js");
+
+const renderedHand = elements.get("#hand").innerHTML;
+assert.equal((renderedHand.match(/class="tile-button/g) || []).length, 14, "player starts with 14 tiles");
+assert.doesNotMatch(renderedHand, /\sdisabled(?:\s|>)/, "player tiles are enabled at the start of their turn");
 
 const { isWinning, isTenpai, getRiichiDiscards, advanceMatchState } = global.__sanmaEngine;
 let nextId = 1;

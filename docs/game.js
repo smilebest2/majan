@@ -180,6 +180,7 @@ function beginTurn(player, firstTurn = false) {
   if (score) {
     if (player === 0) {
       game.busy = false;
+      renderHand();
       setStatus("ツモ和了できます");
       refreshActions();
     } else {
@@ -191,6 +192,7 @@ function beginTurn(player, firstTurn = false) {
 
   if (player === 0) {
     game.busy = false;
+    renderHand();
     setStatus("あなたの番です。牌を選んでください");
     refreshActions();
   } else {
