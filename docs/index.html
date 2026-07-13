@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="theme-color" content="#073f34" />
+    <meta name="description" content="スマホで遊べる、CPU二人との三人麻雀一局戦。" />
+    <title>三麻ひとり打ち</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app" aria-label="三人麻雀ゲーム">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">ONE HAND · SANMA</p>
+          <h1>三麻ひとり打ち</h1>
+        </div>
+        <button id="new-game" class="icon-button" type="button" aria-label="新しい対局">↻</button>
+      </header>
+
+      <section class="table" aria-live="polite">
+        <div class="opponent opponent-left">
+          <div class="player-card">
+            <span class="wind">南</span>
+            <span>CPU 青</span>
+            <strong>35,000</strong>
+          </div>
+          <div class="hidden-hand"><img src="./img/hai/ura.png" alt="伏せ牌" /><span id="cpu1-count">13</span></div>
+        </div>
+
+        <div class="opponent opponent-right">
+          <div class="player-card">
+            <span class="wind">西</span>
+            <span>CPU 橙</span>
+            <strong>35,000</strong>
+          </div>
+          <div class="hidden-hand"><img src="./img/hai/ura.png" alt="伏せ牌" /><span id="cpu2-count">13</span></div>
+        </div>
+
+        <div id="river-1" class="river river-left" aria-label="CPU青の捨て牌"></div>
+        <div id="river-2" class="river river-right" aria-label="CPU橙の捨て牌"></div>
+
+        <section class="center-panel">
+          <div class="round-info">
+            <span class="round-mark">東一局</span>
+            <span>一局戦</span>
+          </div>
+          <div class="dora-box">
+            <span>ドラ表示</span>
+            <img id="dora" src="./img/hai/1p.png" alt="ドラ表示牌" />
+          </div>
+          <strong id="wall-count" class="wall-count">残り 54</strong>
+        </section>
+
+        <div id="river-0" class="river river-player" aria-label="あなたの捨て牌"></div>
+        <p id="status" class="status">あなたの番です。牌を選んでください</p>
+      </section>
+
+      <section class="controls" aria-label="操作">
+        <div id="action-bar" class="action-bar" hidden>
+          <button id="win-action" class="action primary" type="button">ツモ</button>
+          <button id="pass-action" class="action secondary" type="button" hidden>見送る</button>
+        </div>
+        <div class="self-info">
+          <span class="wind dealer">東</span>
+          <span>あなた</span>
+          <strong>35,000</strong>
+        </div>
+        <div id="hand" class="hand" aria-label="あなたの手牌"></div>
+        <p class="hint">牌をタップして打牌</p>
+      </section>
+
+      <dialog id="result-dialog" class="result-dialog">
+        <div class="result-mark" id="result-mark">和</div>
+        <p class="eyebrow">ONE HAND RESULT</p>
+        <h2 id="result-title">ツモ！</h2>
+        <p id="result-detail">見事な和了です</p>
+        <div id="result-hand" class="result-hand"></div>
+        <button id="play-again" class="action primary wide" type="button">もう一局</button>
+      </dialog>
+    </main>
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>
