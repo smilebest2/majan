@@ -110,6 +110,7 @@ function clearMatchState() {
 
 function startGame(matchState = null) {
   clearTimeout(timer);
+  hideActions();
   if (els.dialog.open) els.dialog.close();
   const state = matchState || defaultMatchState();
   const fullWall = buildWall();
@@ -660,6 +661,7 @@ function hideActions() {
   els.ponAction.hidden = true;
   els.kanAction.hidden = true;
   els.passAction.hidden = true;
+  els.passAction.textContent = "見送る";
 }
 
 function winAction() {

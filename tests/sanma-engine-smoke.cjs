@@ -29,6 +29,7 @@ require("../docs/game.js");
 const renderedHand = elements.get("#hand").innerHTML;
 assert.equal((renderedHand.match(/class="tile-button/g) || []).length, 14, "player starts with 14 tiles");
 assert.doesNotMatch(renderedHand, /\sdisabled(?:\s|>)/, "player tiles are enabled at the start of their turn");
+assert.equal(elements.get("#pass-action").textContent, "見送る", "shared pass button starts with the call-pass label");
 
 const { isWinning, isTenpai, getRiichiDiscards, getWaitingCodes, canRiichiAnkan, advanceMatchState } = global.__sanmaEngine;
 let nextId = 1;
