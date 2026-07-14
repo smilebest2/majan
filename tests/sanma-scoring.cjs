@@ -12,6 +12,21 @@ const doubleReachScore = scoreHand(pinfu, { winType: "tsumo", riichi: true, doub
 assert.ok(doubleReachScore.yaku.some((item) => item.name === "ダブルリーチ"), "double riichi");
 assert.ok(doubleReachScore.yaku.some((item) => item.name === "一発"), "ippatsu");
 
+const redDoraHand = pinfu.map((code) => code === "5p" ? "0p" : code);
+const doraBreakdownScore = scoreHand(redDoraHand, {
+  winType: "tsumo",
+  riichi: true,
+  lastTile: "4s",
+  seatWind: 1,
+  roundWind: 1,
+  doraIndicators: ["4p"],
+  nuki: 2,
+});
+assert.deepEqual(doraBreakdownScore.doraBreakdown, { normal: 1, red: 1, nuki: 2, total: 4 }, "normal, red, and nuki dora are counted separately");
+assert.equal(doraBreakdownScore.yaku.find((item) => item.name === "ドラ").han, 1, "normal dora count");
+assert.equal(doraBreakdownScore.yaku.find((item) => item.name === "赤ドラ").han, 1, "red dora count");
+assert.equal(doraBreakdownScore.yaku.find((item) => item.name === "抜きドラ").han, 2, "nuki dora count");
+
 const noYaku = ["1p", "2p", "3p", "4p", "5p", "6p", "7s", "8s", "9s", "2s", "3s", "4s", "1z", "1z"];
 assert.equal(isWinning(noYaku), true, "complete no-yaku shape");
 assert.equal(scoreHand(noYaku, { winType: "ron", lastTile: "4s", seatWind: 1, roundWind: 1 }), null, "no-yaku hand rejected");

@@ -332,7 +332,15 @@
       if (han >= 5 || rawBase >= 2000) { basePoints = 2000; limitName = "満貫"; }
       else basePoints = rawBase;
     }
-    return { yaku: fullYaku, han, fu, yakuman: 0, limitName, basePoints };
+    return {
+      yaku: fullYaku,
+      han,
+      fu,
+      yakuman: 0,
+      limitName,
+      basePoints,
+      doraBreakdown: { normal: dora, red, nuki, total: dora + red + nuki },
+    };
   }
 
   function compareScores(a, b) {

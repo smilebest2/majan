@@ -30,7 +30,7 @@ const renderedHand = elements.get("#hand").innerHTML;
 assert.equal((renderedHand.match(/class="tile-button/g) || []).length, 14, "player starts with 14 tiles");
 assert.doesNotMatch(renderedHand, /\sdisabled(?:\s|>)/, "player tiles are enabled at the start of their turn");
 
-const { isWinning, isTenpai, getRiichiDiscards, advanceMatchState } = global.__sanmaEngine;
+const { isWinning, isTenpai, getRiichiDiscards, getWaitingCodes, canRiichiAnkan, advanceMatchState } = global.__sanmaEngine;
 let nextId = 1;
 const hand = (codes) => codes.map((code) => ({ id: nextId++, code }));
 
@@ -43,6 +43,13 @@ const readyHand = hand(["1m", "1m", "1m", "1p", "2p", "3p", "4p", "5p", "6p", "7
 assert.equal(isTenpai(readyHand), true, "tenpai detection");
 const riichiHand = [...readyHand, { id: nextId++, code: "9s" }];
 assert.ok(getRiichiDiscards(riichiHand).length > 0, "riichi discard candidates");
+
+const riichiKanHand = hand(["5z", "5z", "5z", "1p", "2p", "3p", "4p", "5p", "6p", "1s", "1s", "7s", "8s"]);
+const drawnDragon = { id: nextId++, code: "5z" };
+riichiKanHand.push(drawnDragon);
+assert.deepEqual(getWaitingCodes(riichiKanHand.filter((tile) => tile.id !== drawnDragon.id)), ["6s", "9s"], "waits before riichi ankan");
+assert.equal(canRiichiAnkan(riichiKanHand, [], drawnDragon.id, "5z"), true, "riichi ankan keeps the same waits");
+assert.equal(canRiichiAnkan(riichiKanHand, [], riichiKanHand.find((tile) => tile.code === "1p").id, "5z"), false, "riichi ankan must use the drawn fourth tile");
 
 const initialMatch = { points: [35000, 35000, 35000], dealer: 0, roundWind: 0, handNumber: 0, honba: 0, riichiSticks: 1 };
 assert.deepEqual(advanceMatchState(initialMatch, true, false), { ...initialMatch, honba: 1 }, "dealer repeat");
